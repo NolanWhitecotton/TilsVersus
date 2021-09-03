@@ -76,21 +76,23 @@ func rotateCookieLine(lineType, lineDirection, linePosition):
 		print("MOVE: linetype=" + str(lineType) + " linePos=" 
 			+ str(linePosition) + " dir=" + str(lineDirection)); 
 
-
 func handleAnimationMotion():
 	if movingAnimationInProgress != 0:
 		if movingAnimationInProgress == 5: # if animation should end
 			# end animation
-			movingAnimationInProgress = 0; 
+			movingAnimationInProgress = 0;
 			
 			if(animationLineType==type.row):
 				# TODO generealize this to work on other row and on cols
 				# update cookies
-				var tempCookie = cookies[BOARD_SIZE-1][0];
+				print("temp = " + str(BOARD_SIZE-1))
+				var tempCookie = cookies[BOARD_SIZE-1][animationLinePosition];
 				for curCookie in range(BOARD_SIZE-2, -1, -1):
 					print("Rotating: " + str(curCookie+1) + " = " + str(curCookie))
-					cookies[curCookie+1][0] = cookies[curCookie][0];
-				cookies[0][0] = tempCookie; #todo make this line check the row
+					cookies[curCookie+1][animationLinePosition] = cookies[curCookie][animationLinePosition];
+					
+				print("Wrapping: " + str(0) + " = temp")
+				cookies[0][animationLinePosition] = tempCookie; #todo make this line check the row
 				
 				# wrap real edge cookie
 				tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animationLineDirection;

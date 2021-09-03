@@ -4,7 +4,7 @@
 [ext_resource path="res://sprites/cursor.png" type="Texture" id=3]
 
 [node name="board" type="Node2D"]
-position = Vector2( 500.31, 265.425 )
+position = Vector2( 260.698, 168.872 )
 script = ExtResource( 1 )
 
 [node name="cookies" type="Node2D" parent="."]
