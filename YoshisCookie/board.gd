@@ -28,22 +28,22 @@ var animationLinePosition;
  
 func generateCookies():
 	#reset vars
-	for i in range(BOARD_SIZE):
+	for _i in range(BOARD_SIZE):
 		cookies.append([]);
 		
 	var selectedColors = [0,0,0,0,0] # the count of each color
 	
 	# generate 5 of each tile randomly placed
-	for x in range(BOARD_SIZE): #TODO replace x, y with r, c
-		for y in range(BOARD_SIZE):
+	for r in range(BOARD_SIZE):
+		for c in range(BOARD_SIZE):
 			# create the cookie
 			var new_cookie = cookie_template.instance();
 			find_node("cookies").add_child(new_cookie);
-			cookies[x].append(new_cookie);
+			cookies[r].append(new_cookie);
 
 			# set cookie position
-			new_cookie.get_node("cookie").position.x += x*64;
-			new_cookie.get_node("cookie").position.y += y*64;
+			new_cookie.get_node("cookie").position.x += r*64;
+			new_cookie.get_node("cookie").position.y += c*64;
 
 			# pick the cookie color
 			# TODO, this algorithm is wrong, the cookies can spawn in any
@@ -81,6 +81,9 @@ func handleAnimationMotion():
 		if movingAnimationInProgress == 5: # if animation should end
 			# end animation
 			movingAnimationInProgress = 0;
+			
+			# TODO fix the lack of new cookie. At the begining of the 
+			# animation spawn a fake cookie, move it too, then delete it
 			
 			# update cookies
 			if(animationLineType==type.row):
@@ -126,14 +129,6 @@ func handleAnimationMotion():
 					var r = i;
 					var c = animationLinePosition;
 					cookies[r][c].get_node("cookie").position.x+=16 * animationLineDirection;
-		#todo this might need a delta
-		# spawn a decoy of the same color as the one that is going to wrapped
-		
-		# start moving the cookies in the propper direction
-		
-		# once the animation is done wrap the propper cookie to the other side
-		
-		# delete the decoy cookie
 
 
 func handleCursorMovement():
@@ -152,7 +147,7 @@ func handleCursorMovement():
 		if Input.is_action_just_pressed("cursor_right") and cursor.position.x<cookieOffset*(BOARD_SIZE-1):
 			cursor.position.x += cursorMoveOffset;
 	else:
-		var selectedRow = cursor.position.y/64; # todo calculate selected row
+		var selectedRow = cursor.position.y/64;
 		var selectedCol = cursor.position.x/64;
 		if Input.is_action_just_pressed("cursor_up"):
 			rotateCookieLine(type.col, direction.neg, selectedCol);
@@ -173,8 +168,34 @@ func handleCursorMovement():
 		isMoving = false;
 		cursor_sprite.texture = cursor_texture;
 
+#todo this doesn't need to be called every frame, only after a move
+#TODO write detection
+func handleLineCopletionDetection():
+	for line in range(BOARD_SIZE):
+		# detect cols
+		#TODO dont use the texutre to determine the type of cookie
+		var firstColor = cookies[line][0].find_node("cookie").texture;
+		var matches = true;
+		for c in range(1,BOARD_SIZE):
+			if(cookies[line][c].find_node("cookie").texture != firstColor):
+				matches=false;
+				break;
+		if matches:
+			print("found col, " + str(line));#TODO do something when there is a col match
+			
+		# detect rows
+		firstColor = cookies[0][line].find_node("cookie").texture;
+		matches = true;
+		for r in range(1,BOARD_SIZE):
+			if(cookies[r][line].find_node("cookie").texture != firstColor):
+				matches=false;
+				break;
+		if matches:
+			print("found row, " + str(line));#TODO do something when there is a row match
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	handleCursorMovement();
 	handleAnimationMotion();
+	handleLineCopletionDetection();
