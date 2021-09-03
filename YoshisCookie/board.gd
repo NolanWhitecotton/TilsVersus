@@ -19,13 +19,17 @@ const BOARD_SIZE = 5;
 var cookies=[];
 var isMoving = false;
 
+#enums
+enum type {row, col}
+enum direction {pos=1, neg=-1}
+
 #moving animation stuff
 var movingAnimationInProgress=0;
 var animationLineType;
 var animationLineDirection;
 var animationLinePosition;
 
- 
+# generates the  5x5 grid of cookies
 func generateCookies():
 	#reset vars
 	for _i in range(BOARD_SIZE):
@@ -62,8 +66,7 @@ func _ready():
 	randomize();
 	generateCookies();
 
-enum type {row, col}
-enum direction {pos=1, neg=-1}
+# starts the cookie moving animation
 func rotateCookieLine(lineType, lineDirection, linePosition):
 	if(movingAnimationInProgress == 0):
 		# save the motion for the animation
@@ -76,6 +79,8 @@ func rotateCookieLine(lineType, lineDirection, linePosition):
 		print("MOVE: linetype=" + str(lineType) + " linePos=" 
 			+ str(linePosition) + " dir=" + str(lineDirection)); 
 
+# controls the moving animations and moves the cookies
+# TODO the movement should be done in rotate cookie line probably
 func handleAnimationMotion():
 	if movingAnimationInProgress != 0:
 		if movingAnimationInProgress == 5: # if animation should end
@@ -131,6 +136,7 @@ func handleAnimationMotion():
 					cookies[r][c].get_node("cookie").position.x+=16 * animationLineDirection;
 
 
+# handles user input and moves the cursor accordingly
 func handleCursorMovement():
 	var cursorMoveOffset = 64;
 	var cursor = find_node("cursor");
@@ -138,14 +144,26 @@ func handleCursorMovement():
 	
 	if(not isMoving):
 		# moving cursor
-		if Input.is_action_just_pressed("cursor_up") and cursor.position.y>0:
-			cursor.position.y -= cursorMoveOffset;
-		if Input.is_action_just_pressed("cursor_down") and cursor.position.y<cookieOffset*(BOARD_SIZE-1):
-			cursor.position.y += cursorMoveOffset;
-		if Input.is_action_just_pressed("cursor_left") and cursor.position.x>0:
-			cursor.position.x -= cursorMoveOffset;
-		if Input.is_action_just_pressed("cursor_right") and cursor.position.x<cookieOffset*(BOARD_SIZE-1):
-			cursor.position.x += cursorMoveOffset;
+		if Input.is_action_just_pressed("cursor_up"):
+			if cursor.position.y>0:
+				cursor.position.y -= cursorMoveOffset;
+			else:
+				cursor.position.y = (BOARD_SIZE-1)*64;
+		if Input.is_action_just_pressed("cursor_down"):
+			if cursor.position.y<cookieOffset*(BOARD_SIZE-1):
+				cursor.position.y += cursorMoveOffset;
+			else:
+				cursor.position.y = 0;
+		if Input.is_action_just_pressed("cursor_left"):
+			if cursor.position.x>0:
+				cursor.position.x -= cursorMoveOffset;
+			else:
+				cursor.position.x = (BOARD_SIZE-1)*64;
+		if Input.is_action_just_pressed("cursor_right"):
+			if cursor.position.x<cookieOffset*(BOARD_SIZE-1):
+				cursor.position.x += cursorMoveOffset;
+			else:
+				cursor.position.x = 0;
 	else:
 		var selectedRow = cursor.position.y/64;
 		var selectedCol = cursor.position.x/64;
@@ -168,7 +186,9 @@ func handleCursorMovement():
 		isMoving = false;
 		cursor_sprite.texture = cursor_texture;
 
-#todo this doesn't need to be called every frame, only after a move
+# Checkes every line and row and if it finds a complete row, it calls 
+# handleCompletedLine() to take care of it
+#TODO this doesn't need to be called every frame, only after a move
 #TODO write detection
 func handleLineMatchDetection():
 	for line in range(BOARD_SIZE):
@@ -181,7 +201,7 @@ func handleLineMatchDetection():
 				matches=false;
 				break;
 		if matches:
-			print("found col, " + str(line));#TODO do something when there is a col match
+			handleCompletedLine(type.col,line);
 			
 		# detect rows
 		firstColor = cookies[0][line].find_node("cookie").texture;
@@ -191,7 +211,12 @@ func handleLineMatchDetection():
 				matches=false;
 				break;
 		if matches:
-			print("found row, " + str(line));#TODO do something when there is a row match
+			handleCompletedLine(type.row,line);
+			
+
+
+func handleCompletedLine(lineType, linePos):
+	print("found " + str(lineType) + ", " + str(linePos));#TODO do something when there is a match
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
