@@ -170,7 +170,7 @@ func handleCursorMovement():
 
 #todo this doesn't need to be called every frame, only after a move
 #TODO write detection
-func handleLineCopletionDetection():
+func handleLineMatchDetection():
 	for line in range(BOARD_SIZE):
 		# detect cols
 		#TODO dont use the texutre to determine the type of cookie
@@ -198,4 +198,4 @@ func handleLineCopletionDetection():
 func _process(_delta):
 	handleCursorMovement();
 	handleAnimationMotion();
-	handleLineCopletionDetection();
+	handleLineMatchDetection();

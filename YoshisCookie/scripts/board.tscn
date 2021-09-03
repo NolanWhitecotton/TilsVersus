@@ -3,14 +3,16 @@
 [ext_resource path="res://board.gd" type="Script" id=1]
 [ext_resource path="res://sprites/cursor.png" type="Texture" id=3]
 
-[node name="board" type="Node2D"]
+[node name="game" type="Node"]
+
+[node name="board" type="Node2D" parent="."]
 position = Vector2( 260.698, 168.872 )
 script = ExtResource( 1 )
 
-[node name="cookies" type="Node2D" parent="."]
+[node name="cookies" type="Node2D" parent="board"]
 
-[node name="cursor" type="Node2D" parent="."]
+[node name="cursor" type="Node2D" parent="board"]
 
-[node name="cursor_sprite" type="Sprite" parent="cursor"]
+[node name="cursor_sprite" type="Sprite" parent="board/cursor"]
 z_index = 1
 texture = ExtResource( 3 )
