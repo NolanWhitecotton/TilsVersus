@@ -208,7 +208,6 @@ func handle_completed_line(type, pos):
 		completed_color = cookie_grid[pos][0].find_node("cookie").texture
 	
 	# replace the completed cookies
-	# TODO some kind of poof animation to not make the change jarring
 	var special_pos = randi() % (BOARD_SIZE-1) 
 	if completed_color==cookie_colors[4]: 
 		doSpecialMatch()
@@ -219,7 +218,14 @@ func handle_completed_line(type, pos):
 		var c = cur if type!=LineType.ROW else pos
 		
 		var color = randi() % 4 if cur!=special_pos else 4
-		cookie_grid[r][c].find_node("cookie").texture=cookie_colors[color]
+		var current_cookie = cookie_grid[r][c];
+		current_cookie.find_node("cookie").texture=cookie_colors[color]
+		# TODO cookie positions aren't tracked properly, only the sprite is at
+		# the apparent position, the node2d is at (0,0), this should be changed
+		# for now, this particle thing is a hack to get it working
+		current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x;
+		current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y;
+		current_cookie.find_node("MatchParticles").emitting = true;
 
 
 # Checkes every line and row and if it finds a complete row, it calls 
