@@ -88,10 +88,10 @@ func finish_line_move():
 	# animation spawn a fake cookie, move it too, then delete it
 	
 	# update cookies
+	var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
+	var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
+	
 	if(animation_line_type==LineType.ROW):
-		var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
-		var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
-		
 		var tempCookie = cookie_grid[posToWrap][animation_line_position]
 		if(animation_line_direction==LineSign.POSITIVE): # if row positive
 			for curCookie in range(BOARD_SIZE-2, -1, -1):
@@ -104,9 +104,6 @@ func finish_line_move():
 		# wrap real edge cookie
 		tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animation_line_direction
 	else: #columns
-		var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
-		var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
-		
 		var tempCookie = cookie_grid[animation_line_position][posToWrap]
 		if(animation_line_direction==LineSign.POSITIVE): # if col positive
 			for curCookie in range(BOARD_SIZE-2, -1, -1):
