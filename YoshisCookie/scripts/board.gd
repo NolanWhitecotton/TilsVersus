@@ -3,7 +3,7 @@ extends Node2D
 # dynamic textures
 var cursor_texture = preload("res://sprites/cursor.png")
 var cursor_texture_selected = preload("res://sprites/cursor_selected.png")
-var colors = [
+var cookie_colors = [
 	preload("res://sprites/blue.png"),
 	preload("res://sprites/purple.png"),
 	preload("res://sprites/red.png"),
@@ -16,24 +16,24 @@ var cookie_template = preload("res://scenes/cookie.tscn")
 
 # globals
 const BOARD_SIZE = 5
-var cookies=[]
-var isMoving = false
+var cookie_grid=[]
+var is_moving = false
 
 #enums
-enum type {row, col}
-enum direction {pos=1, neg=-1}
+enum LineType {ROW, COLUMN}
+enum LineSign {POSITIVE=1, NEGATIVE=-1}
 
 #moving animation stuff
-var movingAnimationInProgress=0
-var animationLineType
-var animationLineDirection
-var animationLinePosition
+var moving_animation_progress=0
+var animation_line_type
+var animation_line_direction
+var animation_line_position
 
-# generates the  5x5 grid of cookies
-func generateCookies():
+# generates the 5x5 grid of cookies
+func generate_cookie_grid():
 	#reset vars
 	for _i in range(BOARD_SIZE):
-		cookies.append([])
+		cookie_grid.append([])
 		
 	var selectedColors = [0,0,0,0,0] # the count of each color
 	
@@ -43,7 +43,7 @@ func generateCookies():
 			# create the cookie
 			var new_cookie = cookie_template.instance()
 			find_node("cookies").add_child(new_cookie)
-			cookies[r].append(new_cookie)
+			cookie_grid[r].append(new_cookie)
 
 			# set cookie position
 			new_cookie.get_node("cookie").position.x += r*64
@@ -57,95 +57,98 @@ func generateCookies():
 				num = randi() % (BOARD_SIZE-1)
 
 			# set the cookie color
-			new_cookie.get_node("cookie").texture=colors[num]
+			new_cookie.get_node("cookie").texture=cookie_colors[num]
 			selectedColors[num]+=1
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize()
-	generateCookies()
+	generate_cookie_grid()
 
 
 # starts the cookie moving animation
-func startLineMove(lineType, lineDirection, linePosition):
-	if(movingAnimationInProgress == 0):
+func start_line_move(lineType, lineDirection, linePosition):
+	if(moving_animation_progress == 0):
 		# save the motion for the animation
-		animationLineType = lineType
-		animationLineDirection = lineDirection
-		animationLinePosition = linePosition
+		animation_line_type = lineType
+		animation_line_direction = lineDirection
+		animation_line_position = linePosition
 		
-		movingAnimationInProgress=1 #start the animation
+		moving_animation_progress=1 #start the animation
 		
 		print("MOVE: linetype=" + str(lineType) + " linePos=" 
 			+ str(linePosition) + " dir=" + str(lineDirection)) 
 
-func finishLineMove():
+func finish_line_move():
 	# end animation
-			movingAnimationInProgress = 0
-			
-			# TODO fix the lack of new cookie. At the begining of the 
-			# animation spawn a fake cookie, move it too, then delete it
-			
-			# update cookies
-			if(animationLineType==type.row):
-				var posToWrap = 0 if animationLineDirection==direction.neg else BOARD_SIZE-1
-				var posToWrapto = 0 if animationLineDirection==direction.pos else BOARD_SIZE-1
-				
-				var tempCookie = cookies[posToWrap][animationLinePosition]
-				if(animationLineDirection==direction.pos): # if row positive
-					for curCookie in range(BOARD_SIZE-2, -1, -1):
-						cookies[curCookie+1][animationLinePosition] = cookies[curCookie][animationLinePosition]
-				else: # if row negative
-					for curCookie in range(0, BOARD_SIZE-1, 1):
-						cookies[curCookie][animationLinePosition] = cookies[curCookie+1][animationLinePosition]
-				cookies[posToWrapto][animationLinePosition] = tempCookie
-				
-				# wrap real edge cookie
-				tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animationLineDirection
-			else: #columns
-				var posToWrap = 0 if animationLineDirection==direction.neg else BOARD_SIZE-1
-				var posToWrapto = 0 if animationLineDirection==direction.pos else BOARD_SIZE-1
-				
-				var tempCookie = cookies[animationLinePosition][posToWrap]
-				if(animationLineDirection==direction.pos): # if col positive
-					for curCookie in range(BOARD_SIZE-2, -1, -1):
-						cookies[animationLinePosition][curCookie+1] = cookies[animationLinePosition][curCookie]
-				else: # if col negative
-					for curCookie in range(0, BOARD_SIZE-1, 1):
-						cookies[animationLinePosition][curCookie] = cookies[animationLinePosition][curCookie+1]
-				cookies[animationLinePosition][posToWrapto] = tempCookie
-				
-				# wrap real edge cookie
-				tempCookie.get_node("cookie").position.y -= 64*BOARD_SIZE*animationLineDirection
+	moving_animation_progress = 0
+	
+	# TODO fix the lack of new cookie. At the begining of the 
+	# animation spawn a fake cookie, move it too, then delete it
+	
+	# update cookies
+	if(animation_line_type==LineType.ROW):
+		var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
+		var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
+		
+		var tempCookie = cookie_grid[posToWrap][animation_line_position]
+		if(animation_line_direction==LineSign.POSITIVE): # if row positive
+			for curCookie in range(BOARD_SIZE-2, -1, -1):
+				cookie_grid[curCookie+1][animation_line_position] = cookie_grid[curCookie][animation_line_position]
+		else: # if row negative
+			for curCookie in range(0, BOARD_SIZE-1, 1):
+				cookie_grid[curCookie][animation_line_position] = cookie_grid[curCookie+1][animation_line_position]
+		cookie_grid[posToWrapto][animation_line_position] = tempCookie
+		
+		# wrap real edge cookie
+		tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animation_line_direction
+	else: #columns
+		var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
+		var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
+		
+		var tempCookie = cookie_grid[animation_line_position][posToWrap]
+		if(animation_line_direction==LineSign.POSITIVE): # if col positive
+			for curCookie in range(BOARD_SIZE-2, -1, -1):
+				cookie_grid[animation_line_position][curCookie+1] = cookie_grid[animation_line_position][curCookie]
+		else: # if col negative
+			for curCookie in range(0, BOARD_SIZE-1, 1):
+				cookie_grid[animation_line_position][curCookie] = cookie_grid[animation_line_position][curCookie+1]
+		cookie_grid[animation_line_position][posToWrapto] = tempCookie
+		
+		# wrap real edge cookie
+		tempCookie.get_node("cookie").position.y -= 64*BOARD_SIZE*animation_line_direction
+		
+	# check for match
+	handle_line_match_detection()
 				
 
 
 # controls the moving animations and moves the cookies
-func handleAnimationMotion():
-	if movingAnimationInProgress != 0:
-		if movingAnimationInProgress == 5: # if animation should end
-			finishLineMove()
+func handle_animation_motion():
+	if moving_animation_progress != 0:
+		if moving_animation_progress == 5: # if animation should end
+			finish_line_move()
 		else: # if an animation is progress
-			movingAnimationInProgress += 1
+			moving_animation_progress += 1
 			for i in range(BOARD_SIZE):
-				if animationLineType==type.col:
-					var r = animationLinePosition
+				if animation_line_type==LineType.COLUMN:
+					var r = animation_line_position
 					var c = i
-					cookies[r][c].get_node("cookie").position.y+=16 * animationLineDirection
+					cookie_grid[r][c].get_node("cookie").position.y+=16 * animation_line_direction
 				else:
 					var r = i
-					var c = animationLinePosition
-					cookies[r][c].get_node("cookie").position.x+=16 * animationLineDirection
+					var c = animation_line_position
+					cookie_grid[r][c].get_node("cookie").position.x+=16 * animation_line_direction
 
 
 # handles user input and moves the cursor accordingly
-func handleCursorMovement():
+func handle_cursor_movement():
 	var cursorMoveOffset = 64
 	var cursor = find_node("cursor")
 	var cookieOffset = 64
 	
-	if(not isMoving):
+	if(not is_moving):
 		# moving cursor
 		if Input.is_action_just_pressed("cursor_up"):
 			if cursor.position.y>0:
@@ -171,60 +174,57 @@ func handleCursorMovement():
 		var selectedRow = cursor.position.y/64
 		var selectedCol = cursor.position.x/64
 		if Input.is_action_just_pressed("cursor_up"):
-			startLineMove(type.col, direction.neg, selectedCol)
+			start_line_move(LineType.COLUMN, LineSign.NEGATIVE, selectedCol)
 		if Input.is_action_just_pressed("cursor_down"):
-			startLineMove(type.col, direction.pos, selectedCol)
+			start_line_move(LineType.COLUMN, LineSign.POSITIVE, selectedCol)
 		if Input.is_action_just_pressed("cursor_left"):
-			startLineMove(type.row, direction.neg, selectedRow)
+			start_line_move(LineType.ROW, LineSign.NEGATIVE, selectedRow)
 		if Input.is_action_just_pressed("cursor_right"):
-			startLineMove(type.row, direction.pos, selectedRow)
+			start_line_move(LineType.ROW, LineSign.POSITIVE, selectedRow)
 
 	# handle selection toggle
 	var cursor_sprite = find_node("cursor_sprite")
 
 	if Input.is_action_just_pressed("select_move"):
-		isMoving = true
+		is_moving = true
 		cursor_sprite.texture = cursor_texture_selected
 	if Input.is_action_just_released("select_move"):
-		isMoving = false
+		is_moving = false
 		cursor_sprite.texture = cursor_texture
 
 
-func handleCompletedLine(lineType, linePos):
+func handle_completed_line(lineType, linePos):
 	print("found " + str(lineType) + ", " + str(linePos))#TODO do something when there is a match
 
 
 # Checkes every line and row and if it finds a complete row, it calls 
-# handleCompletedLine() to take care of it
-#TODO this doesn't need to be called every frame, only after a move
-#TODO write detection
-func handleLineMatchDetection():
+# handle_completed_line() to take care of it
+func handle_line_match_detection():
 	for line in range(BOARD_SIZE):
 		# detect cols
 		#TODO dont use the texutre to determine the type of cookie
-		var firstColor = cookies[line][0].find_node("cookie").texture
+		var firstColor = cookie_grid[line][0].find_node("cookie").texture
 		var matches = true
 		for c in range(1,BOARD_SIZE):
-			if(cookies[line][c].find_node("cookie").texture != firstColor):
+			if(cookie_grid[line][c].find_node("cookie").texture != firstColor):
 				matches=false
 				break
 		if matches:
-			handleCompletedLine(type.col,line)
+			handle_completed_line(LineType.COLUMN,line)
 			
 		# detect rows
-		firstColor = cookies[0][line].find_node("cookie").texture
+		firstColor = cookie_grid[0][line].find_node("cookie").texture
 		matches = true
 		for r in range(1,BOARD_SIZE):
-			if(cookies[r][line].find_node("cookie").texture != firstColor):
+			if(cookie_grid[r][line].find_node("cookie").texture != firstColor):
 				matches=false
 				break
 		if matches:
-			handleCompletedLine(type.row,line)
+			handle_completed_line(LineType.ROW,line)
 			
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	handleCursorMovement()
-	handleAnimationMotion()
-	handleLineMatchDetection()
+	handle_cursor_movement()
+	handle_animation_motion()
