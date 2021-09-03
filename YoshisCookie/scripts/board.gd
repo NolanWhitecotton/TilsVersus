@@ -52,9 +52,9 @@ func generate_cookie_grid():
 			# pick the cookie color
 			# TODO, this algorithm is wrong, the cookies can spawn in any
 			# amount as long as adding it doesn't complete a row
-			var num = randi() % (BOARD_SIZE-1)
+			var num = randi() % 4
 			while(selectedColors[num]>BOARD_SIZE+1):
-				num = randi() % (BOARD_SIZE-1)
+				num = randi() % 4
 
 			# set the cookie color
 			new_cookie.get_node("cookie").texture=cookie_colors[num]
@@ -193,8 +193,14 @@ func handle_cursor_movement():
 		cursor_sprite.texture = cursor_texture
 
 
-func handle_completed_line(lineType, linePos):
-	print("found " + str(lineType) + ", " + str(linePos))#TODO do something when there is a match
+func handle_completed_line(type, pos):
+	print("found " + str(type) + ", " + str(pos))
+	var special_pos = randi() % (BOARD_SIZE-1)
+	for cur in range(BOARD_SIZE):
+		var r = cur if type==LineType.ROW else pos
+		var c = cur if type!=LineType.ROW else pos
+		var color = randi() % 4 if cur!=special_pos else 4
+		cookie_grid[r][c].find_node("cookie").texture=cookie_colors[color]
 
 
 # Checkes every line and row and if it finds a complete row, it calls 
