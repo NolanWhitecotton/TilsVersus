@@ -89,31 +89,27 @@ func handleAnimationMotion():
 				# update cookies
 				
 				var tempCookie;
+				print("temp = " + str(posToWrap))
+				tempCookie = cookies[posToWrap][animationLinePosition];
 				if(animationLineDirection==direction.pos):
-					print("temp = " + str(posToWrap))
-					tempCookie = cookies[posToWrap][animationLinePosition];
 					for curCookie in range(BOARD_SIZE-2, -1, -1):
 						print("Rotating: " + str(curCookie+1) + " = " + str(curCookie))
 						cookies[curCookie+1][animationLinePosition] = cookies[curCookie][animationLinePosition];
-					
-					print("Wrapping: " + str(posToWrapto) + " = temp");
-					cookies[posToWrapto][animationLinePosition] = tempCookie; #todo make this line check the row
 				else:
-					print("temp = " + str(posToWrap))
-					tempCookie = cookies[posToWrap][animationLinePosition];
 					for curCookie in range(0, BOARD_SIZE-1, 1):
 						print("Rotating: " + str(curCookie) + " = " + str(curCookie+1))
 						cookies[curCookie][animationLinePosition] = cookies[curCookie+1][animationLinePosition];
 					
-					print("Wrapping: " + str(posToWrapto) + " = temp");
-					cookies[posToWrapto][animationLinePosition] = tempCookie; #todo make this line check the row
-
+				print("Wrapping: " + str(posToWrapto) + " = temp");
+				cookies[posToWrapto][animationLinePosition] = tempCookie;
 				
 				# wrap real edge cookie
 				tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animationLineDirection;
-					
+			else: #columns
+				print("col")
+			
+
 		else: # if an animation is progress
-			print("moving")
 			movingAnimationInProgress += 1;
 			for i in range(BOARD_SIZE):
 				if animationLineType==type.col:
