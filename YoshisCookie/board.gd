@@ -82,31 +82,37 @@ func handleAnimationMotion():
 			# end animation
 			movingAnimationInProgress = 0;
 			
+			# update cookies
 			if(animationLineType==type.row):
 				var posToWrap = 0 if animationLineDirection==direction.neg else BOARD_SIZE-1
 				var posToWrapto = 0 if animationLineDirection==direction.pos else BOARD_SIZE-1
-				# TODO generealize this to work on other row and on cols
-				# update cookies
 				
-				var tempCookie;
-				print("temp = " + str(posToWrap))
-				tempCookie = cookies[posToWrap][animationLinePosition];
-				if(animationLineDirection==direction.pos):
+				var tempCookie = cookies[posToWrap][animationLinePosition];
+				if(animationLineDirection==direction.pos): # if row positive
 					for curCookie in range(BOARD_SIZE-2, -1, -1):
-						print("Rotating: " + str(curCookie+1) + " = " + str(curCookie))
 						cookies[curCookie+1][animationLinePosition] = cookies[curCookie][animationLinePosition];
-				else:
+				else: # if row negative
 					for curCookie in range(0, BOARD_SIZE-1, 1):
-						print("Rotating: " + str(curCookie) + " = " + str(curCookie+1))
 						cookies[curCookie][animationLinePosition] = cookies[curCookie+1][animationLinePosition];
-					
-				print("Wrapping: " + str(posToWrapto) + " = temp");
 				cookies[posToWrapto][animationLinePosition] = tempCookie;
 				
 				# wrap real edge cookie
 				tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animationLineDirection;
 			else: #columns
-				print("col")
+				var posToWrap = 0 if animationLineDirection==direction.neg else BOARD_SIZE-1
+				var posToWrapto = 0 if animationLineDirection==direction.pos else BOARD_SIZE-1
+				
+				var tempCookie = cookies[animationLinePosition][posToWrap];
+				if(animationLineDirection==direction.pos): # if col positive
+					for curCookie in range(BOARD_SIZE-2, -1, -1):
+						cookies[animationLinePosition][curCookie+1] = cookies[animationLinePosition][curCookie];
+				else: # if col negative
+					for curCookie in range(0, BOARD_SIZE-1, 1):
+						cookies[animationLinePosition][curCookie] = cookies[animationLinePosition][curCookie+1];
+				cookies[animationLinePosition][posToWrapto] = tempCookie;
+				
+				# wrap real edge cookie
+				tempCookie.get_node("cookie").position.y -= 64*BOARD_SIZE*animationLineDirection;
 			
 
 		else: # if an animation is progress
