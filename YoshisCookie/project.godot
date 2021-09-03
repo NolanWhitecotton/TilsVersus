@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="YoshisCookie"
-run/main_scene="res://scripts/board.tscn"
+run/main_scene="res://scenes/board.tscn"
 config/icon="res://icon.png"
 
 [input]
