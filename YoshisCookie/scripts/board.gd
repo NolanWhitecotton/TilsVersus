@@ -193,12 +193,31 @@ func handle_cursor_movement():
 		cursor_sprite.texture = cursor_texture
 
 
+func doSpecialMatch():
+	print("Special match!") 
+
+
 func handle_completed_line(type, pos):
 	print("found " + str(type) + ", " + str(pos))
-	var special_pos = randi() % (BOARD_SIZE-1)
+	
+	#get the color that was matched
+	var completed_color
+	if type==LineType.ROW:
+		completed_color = cookie_grid[0][pos].find_node("cookie").texture
+	else:
+		completed_color = cookie_grid[pos][0].find_node("cookie").texture
+	
+	# replace the completed cookies
+	# TODO some kind of poof animation to not make the change jarring
+	var special_pos = randi() % (BOARD_SIZE-1) 
+	if completed_color==cookie_colors[4]: 
+		doSpecialMatch()
+		special_pos = -1
+		 
 	for cur in range(BOARD_SIZE):
 		var r = cur if type==LineType.ROW else pos
 		var c = cur if type!=LineType.ROW else pos
+		
 		var color = randi() % 4 if cur!=special_pos else 4
 		cookie_grid[r][c].find_node("cookie").texture=cookie_colors[color]
 
@@ -208,7 +227,7 @@ func handle_completed_line(type, pos):
 func handle_line_match_detection():
 	for line in range(BOARD_SIZE):
 		# detect cols
-		#TODO dont use the texutre to determine the type of cookie
+		#TODO dont use the texture to determine the type of cookie
 		var firstColor = cookie_grid[line][0].find_node("cookie").texture
 		var matches = true
 		for c in range(1,BOARD_SIZE):
