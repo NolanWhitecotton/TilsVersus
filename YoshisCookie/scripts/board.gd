@@ -190,7 +190,8 @@ func handle_cursor_movement():
 		cursor_sprite.texture = cursor_texture
 
 
-func doSpecialMatch():
+func do_special_match():
+	get_parent().affectOther(get_instance_id())
 	print("Special match!") 
 
 
@@ -207,7 +208,7 @@ func handle_completed_line(type, pos):
 	# replace the completed cookies
 	var special_pos = randi() % (BOARD_SIZE-1) 
 	if completed_color==cookie_colors[4]: 
-		doSpecialMatch()
+		do_special_match()
 		special_pos = -1
 		 
 	for cur in range(BOARD_SIZE):
@@ -250,6 +251,19 @@ func handle_line_match_detection():
 		if matches:
 			handle_completed_line(LineType.ROW,line)
 			
+
+
+func test_particles():
+	for r in range(BOARD_SIZE):
+		for c in range(BOARD_SIZE):
+			var current_cookie = cookie_grid[r][c]
+			# TODO cookie positions aren't tracked properly, only the sprite is at
+			# the apparent position, the node2d is at (0,0), this should be changed
+			# for now, this particle thing is a hack to get it working
+			current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x;
+			current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y;
+			current_cookie.find_node("MatchParticles").emitting = true;
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
