@@ -1,5 +1,8 @@
 extends Node
 
+enum Players {NOONE=0, PLAYER1=1, PLAYER2=2}
+
+var winner = 0
 var board1 = find_node("board1")
 var board2 = find_node("board2")
 
@@ -13,8 +16,23 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	checkForWinner()
 	pass
 
+
+func _draw():
+	#todo display the winner somehow
+	pass
+
+
+func checkForWinner():
+	var health = board1.find_node("health").value
+	if(health==100):
+		winner=Players.PLAYER1
+	health = board2.find_node("health").value
+	if(health==100):
+		winner=Players.PLAYER2
+	
 
 func affectOther(var id):
 	if id==board1.get_instance_id():

@@ -18,7 +18,7 @@ var cookie_template = preload("res://scenes/cookie.tscn")
 const BOARD_SIZE = 5
 var cookie_grid=[]
 var is_moving = false
-export var health_x_offset = 0;
+export var health_x_offset = 0
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -66,8 +66,8 @@ func generate_cookie_grid():
 func _ready():
 	randomize()
 	generate_cookie_grid()
-	find_node("health").margin_left = health_x_offset;
-	find_node("health").margin_right = health_x_offset;
+	find_node("health").margin_left = health_x_offset
+	find_node("health").margin_right = health_x_offset
 
 
 # starts the cookie moving animation
@@ -144,6 +144,10 @@ func handle_animation_motion():
 
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement():
+	#todo comparing an enum to and int for no reason
+	if get_parent().winner != 0: #if the game is over
+		return
+	
 	var cursorMoveOffset = 64
 	var cursor = find_node("cursor")
 	var cookieOffset = 64
@@ -226,14 +230,14 @@ func handle_completed_line(type, pos):
 		var c = cur if type!=LineType.ROW else pos
 		
 		var color = randi() % 4 if cur!=special_pos else 4
-		var current_cookie = cookie_grid[r][c];
+		var current_cookie = cookie_grid[r][c]
 		current_cookie.find_node("cookie").texture=cookie_colors[color]
 		# TODO cookie positions aren't tracked properly, only the sprite is at
 		# the apparent position, the node2d is at (0,0), this should be changed
 		# for now, this particle thing is a hack to get it working
-		current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x;
-		current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y;
-		current_cookie.find_node("MatchParticles").emitting = true;
+		current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x
+		current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y
+		current_cookie.find_node("MatchParticles").emitting = true
 
 
 # Checkes every line and row and if it finds a complete row, it calls 
@@ -270,9 +274,9 @@ func test_particles():
 			# TODO cookie positions aren't tracked properly, only the sprite is at
 			# the apparent position, the node2d is at (0,0), this should be changed
 			# for now, this particle thing is a hack to get it working
-			current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x;
-			current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y;
-			current_cookie.find_node("MatchParticles").emitting = true;
+			current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x
+			current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y
+			current_cookie.find_node("MatchParticles").emitting = true
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -281,6 +285,6 @@ func _process(_delta):
 	handle_animation_motion()
 	
 	# TODO remove this, this should only happen on _ready, this is for debugging
-	find_node("health").margin_left = health_x_offset;
-	find_node("health").margin_right = health_x_offset;
+	find_node("health").margin_left = health_x_offset
+	find_node("health").margin_right = health_x_offset
 
