@@ -7,7 +7,9 @@
 script = ExtResource( 2 )
 
 [node name="board1" parent="." instance=ExtResource( 1 )]
-position = Vector2( 217.579, 258.959 )
+position = Vector2( 200, 260 )
+health_x_offset = 288
 
 [node name="board2" parent="." instance=ExtResource( 1 )]
-position = Vector2( 662.081, 266.968 )
+position = Vector2( 660, 260 )
+health_x_offset = -96

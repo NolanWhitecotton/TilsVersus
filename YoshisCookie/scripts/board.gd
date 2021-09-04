@@ -18,6 +18,7 @@ var cookie_template = preload("res://scenes/cookie.tscn")
 const BOARD_SIZE = 5
 var cookie_grid=[]
 var is_moving = false
+export var health_x_offset = 0;
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -65,8 +66,8 @@ func generate_cookie_grid():
 func _ready():
 	randomize()
 	generate_cookie_grid()
-	get_node("HealthNode").position.x = 100;
-	get_node("HealthNode").position.y = 100;
+	find_node("health").margin_left = health_x_offset;
+	find_node("health").margin_right = health_x_offset;
 
 
 # starts the cookie moving animation
@@ -197,7 +198,14 @@ func do_special_match():
 	print("Special match!") 
 
 
+
+func add_points(points):
+	find_node("health").value+=points
+
+
 func handle_completed_line(type, pos):
+	add_points(5)
+	
 	print("found " + str(type) + ", " + str(pos))
 	
 	#get the color that was matched
@@ -267,8 +275,12 @@ func test_particles():
 			current_cookie.find_node("MatchParticles").emitting = true;
 
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	handle_cursor_movement()
 	handle_animation_motion()
+	
+	# TODO remove this, this should only happen on _ready, this is for debugging
+	find_node("health").margin_left = health_x_offset;
+	find_node("health").margin_right = health_x_offset;
+

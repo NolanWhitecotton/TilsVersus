@@ -18,6 +18,6 @@ func _process(delta):
 
 func affectOther(var id):
 	if id==board1.get_instance_id():
-		board2.test_particles()
+		board2.add_points(-20)
 	else:
-		board1.test_particles()
+		board1.add_points(-20)
