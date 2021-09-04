@@ -65,6 +65,8 @@ func generate_cookie_grid():
 func _ready():
 	randomize()
 	generate_cookie_grid()
+	get_node("HealthNode").position.x = 100;
+	get_node("HealthNode").position.y = 100;
 
 
 # starts the cookie moving animation
