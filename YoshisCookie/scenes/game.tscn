@@ -13,3 +13,4 @@ health_x_offset = 288
 [node name="board2" parent="." instance=ExtResource( 1 )]
 position = Vector2( 660, 260 )
 health_x_offset = -96
+isAI = true

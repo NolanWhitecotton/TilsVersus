@@ -19,6 +19,7 @@ const BOARD_SIZE = 5
 var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
+export var isAI = false
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -142,10 +143,40 @@ func handle_animation_motion():
 					cookie_grid[r][c].get_node("cookie").position.x+=16 * animation_line_direction
 
 
+func select_possible_color():
+	while(true): #TODO this could be finite time, but this is easier
+		var testing = randi() % 5
+		var count = 0
+		for r in range(BOARD_SIZE):
+			for c in range(BOARD_SIZE):
+				if (cookie_grid[r][c].find_node("cookie").texture==cookie_colors[testing]):
+					count += 1
+		if count >= 5:
+			return testing
+	return 0
+
+
+func doAISteps():
+	if moving_animation_progress == 0:
+		var dirInt = randi() % 2
+		var rcInt = randi() % 2
+		
+		var line = randi() % 5
+		var dir = LineSign.POSITIVE if dirInt==0 else LineSign.NEGATIVE
+		var type = LineType.COLUMN if rcInt==0 else LineType.ROW
+		
+		start_line_move(type, dir, line)
+		#print(select_possible_color())
+
+
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement():
 	#todo comparing an enum to and int for no reason
 	if get_parent().winner != 0: #if the game is over
+		return
+		
+	if isAI:
+		doAISteps()
 		return
 	
 	var cursorMoveOffset = 64
