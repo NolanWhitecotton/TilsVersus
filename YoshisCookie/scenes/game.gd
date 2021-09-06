@@ -6,6 +6,7 @@ var winner = 0
 var board1 = find_node("board1")
 var board2 = find_node("board2")
 
+class_name board
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -20,12 +21,8 @@ func _process(delta):
 	pass
 
 
-func _draw():
-	#todo display the winner somehow
-	pass
-
-
 func checkForWinner():
+	#TODO better notification for the winner of the game
 	var health = board1.find_node("health").value
 	if(health==100):
 		winner=Players.PLAYER1

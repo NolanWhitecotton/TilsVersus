@@ -20,7 +20,8 @@ var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
-export var AI_delay_seconds = 0.5
+#var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
+var AI_delay_seconds = 0 #TODO let the AI check the score and modify this value to adjust
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -37,10 +38,8 @@ var AI_time_until_move = AI_delay_seconds
 # generates the 5x5 grid of cookies
 func generate_cookie_grid():
 	#reset vars
-	for _i in range(BOARD_SIZE):
+	for _i in range(BOARD_SIZE):#todo this for loop do anything?
 		cookie_grid.append([])
-		
-	var selectedColors = [0,0,0,0,0] # the count of each color
 	
 	# generate 5 of each tile randomly placed
 	for r in range(BOARD_SIZE):
@@ -55,19 +54,21 @@ func generate_cookie_grid():
 			new_cookie.get_node("cookie").position.y += c*64
 
 			# pick the cookie color
-			# TODO, this algorithm is wrong, the cookies can spawn in any
-			# amount as long as adding it doesn't complete a row
-			var num = randi() % 4
-			while(selectedColors[num]>BOARD_SIZE+1):
-				num = randi() % 4
-
+			var color = randi() % 4
+			
 			# set the cookie color
-			new_cookie.get_node("cookie").texture=cookie_colors[num]
-			selectedColors[num]+=1
+			new_cookie.get_node("cookie").texture=cookie_colors[color]
+	
+	handle_line_match_detection()
+	find_node("health").value=0
+	
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	find_node("health").margin_left = health_x_offset
+	find_node("health").margin_right = health_x_offset
+	
 	randomize()
 	generate_cookie_grid()
 	find_node("health").margin_left = health_x_offset
@@ -83,9 +84,7 @@ func start_line_move(lineType, lineDirection, linePosition):
 		animation_line_position = linePosition
 		
 		moving_animation_progress=1 #start the animation
-		
-		#print("MOVE: linetype=" + str(lineType) + " linePos=" 
-		#	+ str(linePosition) + " dir=" + str(lineDirection)) 
+
 
 func finish_line_move():
 	# end animation
@@ -192,7 +191,7 @@ func ai_set_line_typepos():
 	# TODO this is called every frame, call it only when
 	# the new line color is picked, probably put it in the line completion area
 	# so that the AI doesnt pick a new row every frame
-	ai_line_type =  LineType.ROW
+	ai_line_type =  LineType.COLUMN
 	ai_line_pos = 0
 	#ai_line_pos = randi() % 5
 	#TODO make AI calculated and not hardcoded
@@ -208,10 +207,11 @@ func do_ai_steps():
 			ai_completing_color = select_possible_color()
 			
 		ai_set_line_typepos()
-		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color);
+		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
 		#select the color and linepos to complete
 
-		var piece_y=-1;
+		var piece_y=-1
+		var piece_x=-1
 		# find a piece to move
 		var found = false
 		for r in range(BOARD_SIZE):
@@ -224,6 +224,7 @@ func do_ai_steps():
 					continue 
 				if cookie_grid[r][c].find_node("cookie").texture==cookie_colors[ai_completing_color]:
 					piece_y = c
+					piece_x = r
 					found = true
 					break
 		
@@ -231,25 +232,39 @@ func do_ai_steps():
 		if(ai_line_type==LineType.ROW):#TODO cols
 			ai_anchor_x = to_get_in_place[0]
 			ai_anchor_y = piece_y
+		else:
+			ai_anchor_x = piece_x
+			ai_anchor_y = to_get_in_place[0]
+			#TODO make AI  work on columns not just rows
+			pass
 			
 		#set the cursor to the anchor position
 		var cursor = find_node("cursor")
-		cursor.position.x = (to_get_in_place[0])*64
-		cursor.position.y = (piece_y)*64
 		
-		
-		var countInCol = get_incomplete_in_line(LineType.COLUMN,ai_anchor_x,ai_completing_color).size()
-		if(countInCol==BOARD_SIZE):#if incomplete in row is empty, then move right
-			start_line_move(LineType.ROW, LineSign.POSITIVE, ai_anchor_y)
+
+		if(ai_line_type==LineType.ROW):
+			cursor.position.x = (to_get_in_place[0])*64 #todo delay for cursor?
+			cursor.position.y = (piece_y)*64
+			var countInCol = get_incomplete_in_line(LineType.COLUMN,ai_anchor_x,ai_completing_color).size()
+			if(countInCol==BOARD_SIZE):#if incomplete in row is empty, then move right
+				start_line_move(LineType.ROW, LineSign.POSITIVE, ai_anchor_y) #todo let the ai move the optimal direction instead of always positive
+			else:
+				#move down until piece is in place
+				start_line_move(LineType.COLUMN, LineSign.POSITIVE, to_get_in_place[0])
 		else:
-			#move down until piece is in place
-			start_line_move(LineType.COLUMN, LineSign.POSITIVE, to_get_in_place[0])
+			cursor.position.y = (to_get_in_place[0])*64 #TODO delay for cursor
+			cursor.position.x = (piece_x)*64
+			var countInRow = get_incomplete_in_line(LineType.ROW,ai_anchor_y,ai_completing_color).size()
+			if(countInRow==BOARD_SIZE):#if incomplete in row is empty, then move right
+				start_line_move(LineType.COLUMN, LineSign.POSITIVE, ai_anchor_x)
+			else:
+				#move down until piece is in place
+				start_line_move(LineType.ROW, LineSign.POSITIVE, to_get_in_place[0])
 
 
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement(delta):
-	#todo comparing an enum to and int for no reason
-	if get_parent().winner != 0: #if the game is over
+	if get_parent().winner != board.Players.NOONE: #if the game is over
 		return
 		
 	if isAI:
@@ -396,7 +411,4 @@ func _process(delta):
 	handle_cursor_movement(delta)
 	handle_animation_motion()
 	
-	# TODO remove this, this should only happen on _ready, this is for debugging
-	find_node("health").margin_left = health_x_offset
-	find_node("health").margin_right = health_x_offset
 
