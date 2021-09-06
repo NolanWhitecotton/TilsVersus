@@ -22,7 +22,6 @@ export var health_x_offset = 0
 export var isAI = false
 
 var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
-#var AI_delay_seconds = 0 #TODO let the AI check the score and modify this value to adjust
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -101,6 +100,8 @@ func finish_line_move():
 	
 	# TODO fix the lack of new cookie. At the begining of the 
 	# animation spawn a fake cookie, move it too, then delete it
+	# this fix should probably be done by adding a script to cookie
+	# then letting the cookie handle its own moving
 	
 	# update cookies
 	var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
@@ -390,7 +391,7 @@ func test_particles():
 		for c in range(BOARD_SIZE):
 			var current_cookie = cookie_grid[r][c]
 			# TODO cookie positions aren't tracked properly, only the sprite is at
-			# the apparent position, the node2d is at (0,0), this should be changed
+			# the apparent position, the node2d is at (0,0), this should be changed.
 			# for now, this particle thing is a hack to get it working
 			current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x
 			current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y

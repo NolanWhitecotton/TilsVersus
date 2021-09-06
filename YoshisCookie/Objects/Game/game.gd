@@ -35,7 +35,6 @@ func _process(delta):
 
 
 func checkForWinner():
-	#TODO better notification for the winner of the game
 	var health = board1.find_node("health").value
 	var label = find_node("VictoryText")
 	if(health==100):
