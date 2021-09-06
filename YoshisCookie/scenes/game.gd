@@ -31,7 +31,7 @@ func checkForWinner():
 		winner=Players.PLAYER1
 	health = board2.find_node("health").value
 	if(health==100):
-		#winner=Players.PLAYER2
+		winner=Players.PLAYER2
 		pass
 	
 

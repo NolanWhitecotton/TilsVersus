@@ -20,6 +20,7 @@ var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
+export var AI_delay_seconds = 0.5
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -30,6 +31,8 @@ var moving_animation_progress=0
 var animation_line_type
 var animation_line_direction
 var animation_line_position
+
+var AI_time_until_move = AI_delay_seconds
 
 # generates the 5x5 grid of cookies
 func generate_cookie_grid():
@@ -204,7 +207,7 @@ func do_ai_steps():
 		if(ai_completing_color==-1):
 			ai_completing_color = select_possible_color()
 			
-		ai_set_line_typepos()	
+		ai_set_line_typepos()
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color);
 		#select the color and linepos to complete
 
@@ -244,13 +247,16 @@ func do_ai_steps():
 
 
 # handles user input and moves the cursor accordingly
-func handle_cursor_movement():
+func handle_cursor_movement(delta):
 	#todo comparing an enum to and int for no reason
 	if get_parent().winner != 0: #if the game is over
 		return
 		
 	if isAI:
-		do_ai_steps()
+		AI_time_until_move -= delta
+		if(AI_time_until_move<=0):
+			do_ai_steps()
+			AI_time_until_move = AI_delay_seconds
 		return
 	
 	var cursorMoveOffset = 64
@@ -263,7 +269,7 @@ func handle_cursor_movement():
 			if cursor.position.y>0:
 				cursor.position.y -= cursorMoveOffset
 			else:
-				cursor.position.y = (BOARD_SIZE-1)*64
+				cursor.position.y = (BOARD_SIZE-1)*cursorMoveOffset
 		if Input.is_action_just_pressed("cursor_down"):
 			if cursor.position.y<cookieOffset*(BOARD_SIZE-1):
 				cursor.position.y += cursorMoveOffset
@@ -273,7 +279,7 @@ func handle_cursor_movement():
 			if cursor.position.x>0:
 				cursor.position.x -= cursorMoveOffset
 			else:
-				cursor.position.x = (BOARD_SIZE-1)*64
+				cursor.position.x = (BOARD_SIZE-1)*cursorMoveOffset
 		if Input.is_action_just_pressed("cursor_right"):
 			if cursor.position.x<cookieOffset*(BOARD_SIZE-1):
 				cursor.position.x += cursorMoveOffset
@@ -386,8 +392,8 @@ func test_particles():
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
-	handle_cursor_movement()
+func _process(delta):
+	handle_cursor_movement(delta)
 	handle_animation_motion()
 	
 	# TODO remove this, this should only happen on _ready, this is for debugging
