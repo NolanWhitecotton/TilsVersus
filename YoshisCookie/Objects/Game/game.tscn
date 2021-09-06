@@ -8,19 +8,19 @@ script = ExtResource( 2 )
 pos = 0
 
 [node name="board1" parent="." instance=ExtResource( 1 )]
-position = Vector2( 200, 260 )
+position = Vector2( 153, 215 )
 health_x_offset = 288
 
 [node name="board2" parent="." instance=ExtResource( 1 )]
-position = Vector2( 660, 260 )
+position = Vector2( 613, 215 )
 health_x_offset = -96
 isAI = true
 
 [node name="VictoryText" type="RichTextLabel" parent="."]
-margin_left = 413.021
-margin_top = 93.1361
-margin_right = 651.021
-margin_bottom = 133.136
+margin_left = 422.589
+margin_top = 89.2498
+margin_right = 622.589
+margin_bottom = 136.25
 bbcode_enabled = true
 __meta__ = {
 "_edit_use_anchors_": false

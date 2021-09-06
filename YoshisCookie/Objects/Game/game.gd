@@ -30,6 +30,8 @@ func _process(delta):
 	
 		board1.find_node("health").value = 0
 		board2.find_node("health").value = 0
+		
+		get_tree().reload_current_scene()
 
 
 func checkForWinner():
