@@ -20,6 +20,7 @@ var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
+
 var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
 #var AI_delay_seconds = 0 #TODO let the AI check the score and modify this value to adjust
 
