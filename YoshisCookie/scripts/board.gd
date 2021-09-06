@@ -81,8 +81,8 @@ func start_line_move(lineType, lineDirection, linePosition):
 		
 		moving_animation_progress=1 #start the animation
 		
-		print("MOVE: linetype=" + str(lineType) + " linePos=" 
-			+ str(linePosition) + " dir=" + str(lineDirection)) 
+		#print("MOVE: linetype=" + str(lineType) + " linePos=" 
+		#	+ str(linePosition) + " dir=" + str(lineDirection)) 
 
 func finish_line_move():
 	# end animation
@@ -143,30 +143,104 @@ func handle_animation_motion():
 					cookie_grid[r][c].get_node("cookie").position.x+=16 * animation_line_direction
 
 
-func select_possible_color():
-	while(true): #TODO this could be finite time, but this is easier
-		var testing = randi() % 5
+func get_all_possible_colors():
+	var possible = []
+	
+	for testing in range(5):# for every color
 		var count = 0
-		for r in range(BOARD_SIZE):
+		for r in range(BOARD_SIZE):#for every place on the board
 			for c in range(BOARD_SIZE):
 				if (cookie_grid[r][c].find_node("cookie").texture==cookie_colors[testing]):
 					count += 1
 		if count >= 5:
-			return testing
-	return 0
+			possible.append(testing)
+			
+	print(possible)
+	return possible
 
 
-func doAISteps():
+func select_possible_color():
+	var valid_colors = get_all_possible_colors()
+	var selecting = valid_colors[randi() % valid_colors.size()]
+	print("selecting=" + str(selecting))
+	return selecting
+
+
+
+var ai_completing_color = -1
+var ai_line_type
+var ai_line_pos
+
+
+func get_incomplete_in_line(var lineType, var linePos, var goalColor):
+	var incomplete = []
+	for checking in range(5):
+		if lineType==LineType.COLUMN:
+			if(cookie_grid[linePos][checking].find_node("cookie").texture!=cookie_colors[goalColor]):
+				incomplete.append(checking)
+		else:
+			if(cookie_grid[checking][linePos].find_node("cookie").texture!=cookie_colors[goalColor]):
+				incomplete.append(checking)
+				
+	return incomplete
+
+
+func ai_set_line_typepos():
+	# TODO this is called every frame, call it only when
+	# the new line color is picked, probably put it in the line completion area
+	# so that the AI doesnt pick a new row every frame
+	ai_line_type =  LineType.ROW
+	ai_line_pos = 0
+	#ai_line_pos = randi() % 5
+	#TODO make AI calculated and not hardcoded
+	#TODO make AI  work on columns not just rows
+
+var ai_anchor_x
+var ai_anchor_y
+
+func do_ai_steps():
 	if moving_animation_progress == 0:
-		var dirInt = randi() % 2
-		var rcInt = randi() % 2
+		#ai_completing_color = 0
+		if(ai_completing_color==-1):
+			ai_completing_color = select_possible_color()
+			
+		ai_set_line_typepos()	
+		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color);
+		#select the color and linepos to complete
+
+		var piece_y=-1;
+		# find a piece to move
+		var found = false
+		for r in range(BOARD_SIZE):
+			if(found):
+				break
+			if(ai_line_type==LineType.COLUMN) and ai_line_pos==r: #skip if its the one we're solving
+				continue 
+			for c in range(BOARD_SIZE):
+				if(ai_line_type==LineType.ROW) and ai_line_pos==c: #skip if its the one we're solving
+					continue 
+				if cookie_grid[r][c].find_node("cookie").texture==cookie_colors[ai_completing_color]:
+					piece_y = c
+					found = true
+					break
 		
-		var line = randi() % 5
-		var dir = LineSign.POSITIVE if dirInt==0 else LineSign.NEGATIVE
-		var type = LineType.COLUMN if rcInt==0 else LineType.ROW
+		#set the anchor
+		if(ai_line_type==LineType.ROW):#TODO cols
+			ai_anchor_x = to_get_in_place[0]
+			ai_anchor_y = piece_y
+			
+		#set the cursor to the anchor position
+		var cursor = find_node("cursor")
+		cursor.position.x = (to_get_in_place[0])*64
+		cursor.position.y = (piece_y)*64
 		
-		start_line_move(type, dir, line)
-		#print(select_possible_color())
+		
+		var countInCol = get_incomplete_in_line(LineType.COLUMN,ai_anchor_x,ai_completing_color).size()
+		if(countInCol==BOARD_SIZE):#if incomplete in row is empty, then move right
+			start_line_move(LineType.ROW, LineSign.POSITIVE, ai_anchor_y)
+		else:
+			#move down until piece is in place
+			start_line_move(LineType.COLUMN, LineSign.POSITIVE, to_get_in_place[0])
 
 
 # handles user input and moves the cursor accordingly
@@ -176,7 +250,7 @@ func handle_cursor_movement():
 		return
 		
 	if isAI:
-		doAISteps()
+		do_ai_steps()
 		return
 	
 	var cursorMoveOffset = 64
@@ -239,10 +313,11 @@ func add_points(points):
 
 
 func handle_completed_line(type, pos):
+	ai_completing_color = -1
+	print("line completed")
+	
 	add_points(5)
-	
-	print("found " + str(type) + ", " + str(pos))
-	
+
 	#get the color that was matched
 	var completed_color
 	if type==LineType.ROW:
