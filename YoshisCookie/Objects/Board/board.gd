@@ -1,18 +1,18 @@
 extends Node2D
 
 # dynamic textures
-var cursor_texture = preload("res://sprites/cursor.png")
-var cursor_texture_selected = preload("res://sprites/cursor_selected.png")
+var cursor_texture = preload("res://Objects/Board/cursor.png")
+var cursor_texture_selected = preload("res://Objects/Board/cursor_selected.png")
 var cookie_colors = [
-	preload("res://sprites/blue.png"),
-	preload("res://sprites/purple.png"),
-	preload("res://sprites/red.png"),
-	preload("res://sprites/white.png"),
-	preload("res://sprites/gold.png")
+	preload("res://Objects/Cookie/blue.png"),
+	preload("res://Objects/Cookie/purple.png"),
+	preload("res://Objects/Cookie/red.png"),
+	preload("res://Objects/Cookie/white.png"),
+	preload("res://Objects/Cookie/gold.png")
 	]
 
 # scenes
-var cookie_template = preload("res://scenes/cookie.tscn")
+var cookie_template = preload("res://Objects/Cookie/cookie.tscn")
 
 # globals
 const BOARD_SIZE = 5
@@ -20,8 +20,8 @@ var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
-#var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
-var AI_delay_seconds = 0 #TODO let the AI check the score and modify this value to adjust
+var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
+#var AI_delay_seconds = 0 #TODO let the AI check the score and modify this value to adjust
 
 #enums
 enum LineType {ROW, COLUMN}
@@ -33,12 +33,15 @@ var animation_line_type
 var animation_line_direction
 var animation_line_position
 
-var AI_time_until_move = AI_delay_seconds
+var ai_completing_color = -1
+var ai_line_type
+var ai_line_pos
+var AI_time_until_move
 
 # generates the 5x5 grid of cookies
 func generate_cookie_grid():
-	#reset vars
-	for _i in range(BOARD_SIZE):#todo this for loop do anything?
+	#append once for each row of the array
+	for _i in range(BOARD_SIZE):
 		cookie_grid.append([])
 	
 	# generate 5 of each tile randomly placed
@@ -71,8 +74,13 @@ func _ready():
 	
 	randomize()
 	generate_cookie_grid()
+	
 	find_node("health").margin_left = health_x_offset
 	find_node("health").margin_right = health_x_offset
+	
+	ai_set_line_typepos()
+	
+	AI_time_until_move = AI_delay_seconds
 
 
 # starts the cookie moving animation
@@ -157,21 +165,13 @@ func get_all_possible_colors():
 		if count >= 5:
 			possible.append(testing)
 			
-	print(possible)
 	return possible
 
 
 func select_possible_color():
 	var valid_colors = get_all_possible_colors()
 	var selecting = valid_colors[randi() % valid_colors.size()]
-	print("selecting=" + str(selecting))
 	return selecting
-
-
-
-var ai_completing_color = -1
-var ai_line_type
-var ai_line_pos
 
 
 func get_incomplete_in_line(var lineType, var linePos, var goalColor):
@@ -188,14 +188,8 @@ func get_incomplete_in_line(var lineType, var linePos, var goalColor):
 
 
 func ai_set_line_typepos():
-	# TODO this is called every frame, call it only when
-	# the new line color is picked, probably put it in the line completion area
-	# so that the AI doesnt pick a new row every frame
-	ai_line_type =  LineType.COLUMN
-	ai_line_pos = 0
-	#ai_line_pos = randi() % 5
-	#TODO make AI calculated and not hardcoded
-	#TODO make AI  work on columns not just rows
+	ai_line_type =  LineType.COLUMN if randi()%2 else LineType.ROW 
+	ai_line_pos = randi() % 5
 
 var ai_anchor_x
 var ai_anchor_y
@@ -206,7 +200,7 @@ func do_ai_steps():
 		if(ai_completing_color==-1):
 			ai_completing_color = select_possible_color()
 			
-		ai_set_line_typepos()
+		#ai_set_line_typepos()
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
 		#select the color and linepos to complete
 
@@ -229,14 +223,12 @@ func do_ai_steps():
 					break
 		
 		#set the anchor
-		if(ai_line_type==LineType.ROW):#TODO cols
+		if(ai_line_type==LineType.ROW):
 			ai_anchor_x = to_get_in_place[0]
 			ai_anchor_y = piece_y
 		else:
 			ai_anchor_x = piece_x
 			ai_anchor_y = to_get_in_place[0]
-			#TODO make AI  work on columns not just rows
-			pass
 			
 		#set the cursor to the anchor position
 		var cursor = find_node("cursor")
@@ -264,7 +256,7 @@ func do_ai_steps():
 
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement(delta):
-	if get_parent().winner != board.Players.NOONE: #if the game is over
+	if get_parent().winner != board_class.Players.NOONE: #if the game is over
 		return
 		
 	if isAI:
@@ -325,8 +317,6 @@ func handle_cursor_movement(delta):
 
 func do_special_match():
 	get_parent().affectOther(get_instance_id())
-	print("Special match!") 
-
 
 
 func add_points(points):
@@ -335,7 +325,7 @@ func add_points(points):
 
 func handle_completed_line(type, pos):
 	ai_completing_color = -1
-	print("line completed")
+	ai_set_line_typepos()
 	
 	add_points(5)
 
@@ -410,5 +400,4 @@ func test_particles():
 func _process(delta):
 	handle_cursor_movement(delta)
 	handle_animation_motion()
-	
 

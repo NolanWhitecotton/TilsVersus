@@ -10,18 +10,18 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node",
-"class": "board",
+"class": "board_class",
 "language": "GDScript",
-"path": "res://scenes/game.gd"
+"path": "res://Objects/Game/game.gd"
 } ]
 _global_script_class_icons={
-"board": ""
+"board_class": ""
 }
 
 [application]
 
 config/name="YoshisCookie"
-run/main_scene="res://scenes/game.tscn"
+run/main_scene="res://Objects/Game/game.tscn"
 config/icon="res://icon.png"
 
 [display]

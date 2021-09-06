@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/cursor_selected.png-ffec0ce18047b0dc28e29c8ef666341f.stex"
+path="res://.import/gold.png-e0e4b7b2b2f6502117132808e5700cfd.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/cursor_selected.png"
-dest_files=[ "res://.import/cursor_selected.png-ffec0ce18047b0dc28e29c8ef666341f.stex" ]
+source_file="res://Objects/Cookie/gold.png"
+dest_files=[ "res://.import/gold.png-e0e4b7b2b2f6502117132808e5700cfd.stex" ]
 
 [params]
 

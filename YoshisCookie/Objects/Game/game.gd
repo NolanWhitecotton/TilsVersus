@@ -6,7 +6,7 @@ var winner = 0
 var board1 = find_node("board1")
 var board2 = find_node("board2")
 
-class_name board
+class_name board_class
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
