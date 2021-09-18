@@ -1,6 +1,6 @@
 extends Node2D
 
-class_name board
+class_name Board
 
 # dynamic textures
 var cursor_texture = preload("res://Objects/Board/cursor.png")
@@ -252,7 +252,7 @@ func do_ai_steps():
 
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement(delta):
-	if get_parent().winner != board_class.Players.NOONE: #if the game is over
+	if get_parent().winner != Game.Players.NOONE: #if the game is over
 		return
 		
 	if isAI:
@@ -334,7 +334,7 @@ func handle_completed_line(type, pos):
 	
 	# replace the completed cookies
 	var special_pos = randi() % (BOARD_SIZE-1) 
-	if completed_color==cookie.Colors.GOLD: 
+	if completed_color==Cookie.Colors.GOLD: 
 		do_special_match()
 		special_pos = -1
 		 

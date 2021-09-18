@@ -1,5 +1,7 @@
 extends Node2D
 
+class_name Game
+
 enum Players {NOONE=0, PLAYER1=1, PLAYER2=2}
 
 var winner = 0
@@ -7,8 +9,6 @@ var board1 = find_node("board1")
 var board2 = find_node("board2")
 
 export var pos = 100
-
-class_name board_class
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

@@ -1,6 +1,6 @@
 extends Node
 
-class_name cookie
+class_name Cookie
 
 var color
 enum Colors {BLUE, PURPLE, RED, WHITE, GOLD}
@@ -25,3 +25,4 @@ func set_color(new_color):
 
 func get_color():
 	return color
+	
