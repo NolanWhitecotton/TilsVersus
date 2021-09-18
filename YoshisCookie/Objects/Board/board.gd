@@ -1,5 +1,7 @@
 extends Node2D
 
+class_name board
+
 # dynamic textures
 var cursor_texture = preload("res://Objects/Board/cursor.png")
 var cursor_texture_selected = preload("res://Objects/Board/cursor_selected.png")
@@ -46,14 +48,14 @@ func generate_cookie_grid():
 			cookie_grid[r].append(new_cookie)
 
 			# set cookie position
-			new_cookie.get_node("cookie").position.x += r*64
-			new_cookie.get_node("cookie").position.y += c*64
+			new_cookie.position.x += r*64
+			new_cookie.position.y += c*64
 
 			# pick the cookie color
 			var color = randi() % 4
 			
 			# set the cookie color
-			new_cookie.set_color(color);
+			new_cookie.set_color(color)
 	
 	handle_line_match_detection()
 	find_node("health").value=0
@@ -67,9 +69,6 @@ func _ready():
 	
 	randomize()
 	generate_cookie_grid()
-	
-	find_node("health").margin_left = health_x_offset
-	find_node("health").margin_right = health_x_offset
 	
 	ai_set_line_typepos()
 	
@@ -111,7 +110,7 @@ func finish_line_move():
 		cookie_grid[posToWrapto][animation_line_position] = tempCookie
 		
 		# wrap real edge cookie
-		tempCookie.get_node("cookie").position.x -= 64*BOARD_SIZE*animation_line_direction
+		tempCookie.position.x -= 64*BOARD_SIZE*animation_line_direction
 	else: #columns
 		var tempCookie = cookie_grid[animation_line_position][posToWrap]
 		if(animation_line_direction==LineSign.POSITIVE): # if col positive
@@ -123,7 +122,7 @@ func finish_line_move():
 		cookie_grid[animation_line_position][posToWrapto] = tempCookie
 		
 		# wrap real edge cookie
-		tempCookie.get_node("cookie").position.y -= 64*BOARD_SIZE*animation_line_direction
+		tempCookie.position.y -= 64*BOARD_SIZE*animation_line_direction
 		
 	# check for match
 	handle_line_match_detection()
@@ -141,11 +140,11 @@ func handle_animation_motion():
 				if animation_line_type==LineType.COLUMN:
 					var r = animation_line_position
 					var c = i
-					cookie_grid[r][c].get_node("cookie").position.y+=16 * animation_line_direction
+					cookie_grid[r][c].position.y+=16 * animation_line_direction
 				else:
 					var r = i
 					var c = animation_line_position
-					cookie_grid[r][c].get_node("cookie").position.x+=16 * animation_line_direction
+					cookie_grid[r][c].position.x+=16 * animation_line_direction
 
 
 func get_all_possible_colors():
@@ -346,11 +345,6 @@ func handle_completed_line(type, pos):
 		var color = randi() % 4 if cur!=special_pos else 4
 		var current_cookie = cookie_grid[r][c]
 		current_cookie.set_color(color)
-		# TODO cookie positions aren't tracked properly, only the sprite is at
-		# the apparent position, the node2d is at (0,0), this should be changed
-		# for now, this particle thing is a hack to get it working
-		current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x
-		current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y
 		current_cookie.find_node("MatchParticles").emitting = true
 
 
@@ -378,18 +372,6 @@ func handle_line_match_detection():
 		if matches:
 			handle_completed_line(LineType.ROW,line)
 			
-
-
-func test_particles():
-	for r in range(BOARD_SIZE):
-		for c in range(BOARD_SIZE):
-			var current_cookie = cookie_grid[r][c]
-			# TODO cookie positions aren't tracked properly, only the sprite is at
-			# the apparent position, the node2d is at (0,0), this should be changed.
-			# for now, this particle thing is a hack to get it working
-			current_cookie.find_node("MatchParticles").position.x=current_cookie.find_node("cookie").position.x
-			current_cookie.find_node("MatchParticles").position.y=current_cookie.find_node("cookie").position.y
-			current_cookie.find_node("MatchParticles").emitting = true
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

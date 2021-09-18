@@ -3,7 +3,7 @@
 [ext_resource path="res://Objects/Cookie/red.png" type="Texture" id=1]
 [ext_resource path="res://Objects/Cookie/cookie.gd" type="Script" id=2]
 
-[sub_resource type="ParticlesMaterial" id=2]
+[sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 1
 emission_sphere_radius = 1.0
 flag_disable_z = true
@@ -32,4 +32,4 @@ lifetime = 0.4
 one_shot = true
 explosiveness = 0.38
 randomness = 0.25
-process_material = SubResource( 2 )
+process_material = SubResource( 1 )

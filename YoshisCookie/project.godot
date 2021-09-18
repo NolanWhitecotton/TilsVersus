@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node2D",
+"class": "board",
+"language": "GDScript",
+"path": "res://Objects/Board/board.gd"
+}, {
+"base": "Node2D",
 "class": "board_class",
 "language": "GDScript",
 "path": "res://Objects/Game/game.gd"
@@ -20,6 +25,7 @@ _global_script_classes=[ {
 "path": "res://Objects/Cookie/cookie.gd"
 } ]
 _global_script_class_icons={
+"board": "",
 "board_class": "",
 "cookie": ""
 }
