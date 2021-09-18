@@ -13,9 +13,15 @@ _global_script_classes=[ {
 "class": "board_class",
 "language": "GDScript",
 "path": "res://Objects/Game/game.gd"
+}, {
+"base": "Node",
+"class": "cookie",
+"language": "GDScript",
+"path": "res://Objects/Cookie/cookie.gd"
 } ]
 _global_script_class_icons={
-"board_class": ""
+"board_class": "",
+"cookie": ""
 }
 
 [application]

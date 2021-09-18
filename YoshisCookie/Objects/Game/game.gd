@@ -20,7 +20,7 @@ func _ready():
 func _process(delta):
 	checkForWinner()
 	update()
-	
+
 	#reset game
 	if(winner!=Players.NOONE) and Input.is_action_just_pressed("ui_accept"):
 		winner = Players.NOONE
@@ -32,6 +32,7 @@ func _process(delta):
 		board2.find_node("health").value = 0
 		
 		get_tree().reload_current_scene()
+		
 
 
 func checkForWinner():

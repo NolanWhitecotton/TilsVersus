@@ -3,13 +3,6 @@ extends Node2D
 # dynamic textures
 var cursor_texture = preload("res://Objects/Board/cursor.png")
 var cursor_texture_selected = preload("res://Objects/Board/cursor_selected.png")
-var cookie_colors = [
-	preload("res://Objects/Cookie/blue.png"),
-	preload("res://Objects/Cookie/purple.png"),
-	preload("res://Objects/Cookie/red.png"),
-	preload("res://Objects/Cookie/white.png"),
-	preload("res://Objects/Cookie/gold.png")
-	]
 
 # scenes
 var cookie_template = preload("res://Objects/Cookie/cookie.tscn")
@@ -60,7 +53,7 @@ func generate_cookie_grid():
 			var color = randi() % 4
 			
 			# set the cookie color
-			new_cookie.get_node("cookie").texture=cookie_colors[color]
+			new_cookie.set_color(color);
 	
 	handle_line_match_detection()
 	find_node("health").value=0
@@ -162,7 +155,7 @@ func get_all_possible_colors():
 		var count = 0
 		for r in range(BOARD_SIZE):#for every place on the board
 			for c in range(BOARD_SIZE):
-				if (cookie_grid[r][c].find_node("cookie").texture==cookie_colors[testing]):
+				if (cookie_grid[r][c].get_color()==testing):
 					count += 1
 		if count >= 5:
 			possible.append(testing)
@@ -180,10 +173,10 @@ func get_incomplete_in_line(var lineType, var linePos, var goalColor):
 	var incomplete = []
 	for checking in range(5):
 		if lineType==LineType.COLUMN:
-			if(cookie_grid[linePos][checking].find_node("cookie").texture!=cookie_colors[goalColor]):
+			if(cookie_grid[linePos][checking].get_color()!=goalColor):
 				incomplete.append(checking)
 		else:
-			if(cookie_grid[checking][linePos].find_node("cookie").texture!=cookie_colors[goalColor]):
+			if(cookie_grid[checking][linePos].get_color()!=goalColor):
 				incomplete.append(checking)
 				
 	return incomplete
@@ -204,8 +197,10 @@ func do_ai_steps():
 			
 		#ai_set_line_typepos()
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
+		#TODO somehow this ^ is possible to return empty, not sure how a line could
+		#be complete and not be detected, and it is very rare
+		
 		#select the color and linepos to complete
-
 		var piece_y=-1
 		var piece_x=-1
 		# find a piece to move
@@ -218,7 +213,7 @@ func do_ai_steps():
 			for c in range(BOARD_SIZE):
 				if(ai_line_type==LineType.ROW) and ai_line_pos==c: #skip if its the one we're solving
 					continue 
-				if cookie_grid[r][c].find_node("cookie").texture==cookie_colors[ai_completing_color]:
+				if cookie_grid[r][c].get_color()==ai_completing_color:
 					piece_y = c
 					piece_x = r
 					found = true
@@ -334,13 +329,13 @@ func handle_completed_line(type, pos):
 	#get the color that was matched
 	var completed_color
 	if type==LineType.ROW:
-		completed_color = cookie_grid[0][pos].find_node("cookie").texture
+		completed_color = cookie_grid[0][pos].get_color()
 	else:
-		completed_color = cookie_grid[pos][0].find_node("cookie").texture
+		completed_color = cookie_grid[pos][0].get_color()
 	
 	# replace the completed cookies
 	var special_pos = randi() % (BOARD_SIZE-1) 
-	if completed_color==cookie_colors[4]: 
+	if completed_color==cookie.Colors.GOLD: 
 		do_special_match()
 		special_pos = -1
 		 
@@ -350,7 +345,7 @@ func handle_completed_line(type, pos):
 		
 		var color = randi() % 4 if cur!=special_pos else 4
 		var current_cookie = cookie_grid[r][c]
-		current_cookie.find_node("cookie").texture=cookie_colors[color]
+		current_cookie.set_color(color)
 		# TODO cookie positions aren't tracked properly, only the sprite is at
 		# the apparent position, the node2d is at (0,0), this should be changed
 		# for now, this particle thing is a hack to get it working
@@ -364,21 +359,20 @@ func handle_completed_line(type, pos):
 func handle_line_match_detection():
 	for line in range(BOARD_SIZE):
 		# detect cols
-		#TODO dont use the texture to determine the type of cookie
-		var firstColor = cookie_grid[line][0].find_node("cookie").texture
+		var firstColor = cookie_grid[line][0].get_color()
 		var matches = true
 		for c in range(1,BOARD_SIZE):
-			if(cookie_grid[line][c].find_node("cookie").texture != firstColor):
+			if(cookie_grid[line][c].get_color() != firstColor):
 				matches=false
 				break
 		if matches:
 			handle_completed_line(LineType.COLUMN,line)
 			
 		# detect rows
-		firstColor = cookie_grid[0][line].find_node("cookie").texture
+		firstColor = cookie_grid[0][line].get_color()
 		matches = true
 		for r in range(1,BOARD_SIZE):
-			if(cookie_grid[r][line].find_node("cookie").texture != firstColor):
+			if(cookie_grid[r][line].get_color() != firstColor):
 				matches=false
 				break
 		if matches:
