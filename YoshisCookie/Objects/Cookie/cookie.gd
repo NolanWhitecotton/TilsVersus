@@ -48,7 +48,7 @@ func start_move_animation(lineType, lineDirection, linePosition, wrapAfter):
 # controls the moving animations and moves the cookies
 func handle_animation_motion():
 	if moving_animation_progress != 0:
-		if moving_animation_progress == 5: # if animation should end
+		if moving_animation_progress >= 5: # if animation should end
 			moving_animation_progress = 0
 			if(animation_wrap_after):
 				var wrapDistance = 64*5*animation_line_direction #TODO use Board.BOARD_SIZE
@@ -67,4 +67,4 @@ func _process(delta):
 	handle_animation_motion()
 	
 func is_animating():
-	return moving_animation_progress==0
+	return moving_animation_progress!=0

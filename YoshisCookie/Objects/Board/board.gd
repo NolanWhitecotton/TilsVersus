@@ -22,9 +22,6 @@ var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this val
 enum LineType {ROW, COLUMN}
 enum LineSign {POSITIVE=1, NEGATIVE=-1}
 
-#moving animation stuff
-var moving_animation_progress=0 #TODO query all the cookies to see if they are moving
-
 var ai_completing_color = -1
 var ai_line_type
 var ai_line_pos
@@ -166,7 +163,7 @@ var ai_anchor_x
 var ai_anchor_y
 
 func do_ai_steps():
-	if moving_animation_progress == 0:
+	if not animation_in_progress():
 		#ai_completing_color = 0
 		if(ai_completing_color==-1):
 			ai_completing_color = select_possible_color()
@@ -355,3 +352,9 @@ func handle_line_match_detection():
 func _process(delta):
 	handle_cursor_movement(delta)
 
+func animation_in_progress():
+	for r in range(BOARD_SIZE):
+		for c in range(BOARD_SIZE):
+			if cookie_grid[r][c].is_animating():
+				return true
+	return false
