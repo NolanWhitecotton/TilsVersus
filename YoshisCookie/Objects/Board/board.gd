@@ -15,6 +15,7 @@ var cookie_grid=[]
 var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
+onready var cursor = find_node("cursor")
 
 var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
 
@@ -143,7 +144,7 @@ func select_possible_color():
 
 func get_incomplete_in_line(var lineType, var linePos, var goalColor):
 	var incomplete = []
-	for checking in range(5):
+	for checking in range(BOARD_SIZE):
 		if lineType==LineType.COLUMN:
 			if(cookie_grid[linePos][checking].get_color()!=goalColor):
 				incomplete.append(checking)
@@ -156,26 +157,23 @@ func get_incomplete_in_line(var lineType, var linePos, var goalColor):
 
 func ai_set_line_typepos():
 	ai_line_type =  LineType.COLUMN if randi()%2 else LineType.ROW 
-	ai_line_pos = randi() % 5
+	ai_line_pos = randi() % BOARD_SIZE
 
-var ai_anchor_x
-var ai_anchor_y
 
-func do_ai_steps():
+func do_ai_steps():	
 	if not animation_in_progress():
-		#ai_completing_color = 0
+		# pick a color to solve
 		if(ai_completing_color==-1):
 			ai_completing_color = select_possible_color()
-			
-		#ai_set_line_typepos()
+		
+		# check the pieces that need to be solved
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
-		#TODO somehow this ^ is possible to return empty, not sure how a line could
+		#TODO somehow this^ is possible to return empty, not sure how a line could
 		#be complete and not be detected, and it is very rare
 		
-		#select the color and linepos to complete
-		var piece_y=-1
-		var piece_x=-1
-		# find a piece to move
+		var piece_y
+		var piece_x
+		# find a piece that matches the color we are solving that is not in the right place
 		var found = false
 		for r in range(BOARD_SIZE):
 			if(found):
@@ -191,36 +189,40 @@ func do_ai_steps():
 					found = true
 					break
 		
-		#set the anchor
+		# The anchor is the position which the cursor would have
+		# to be in such that the cookie we are moving is either in the row or 
+		# column of the cursor and the position we are moving it to is in the other.
+		var ai_anchor_x
+		var ai_anchor_y
+		
+		# Gets the piece on one of the right axes, then the other.
+		var first_axis_type
+		var first_axis_pos
+		var second_axis_pos 
+
 		if(ai_line_type==LineType.ROW):
 			ai_anchor_x = to_get_in_place[0]
 			ai_anchor_y = piece_y
+			first_axis_type = LineType.COLUMN
+			first_axis_pos = ai_anchor_x
+			second_axis_pos = ai_anchor_y
 		else:
 			ai_anchor_x = piece_x
 			ai_anchor_y = to_get_in_place[0]
-			
-		#set the cursor to the anchor position
-		var cursor = find_node("cursor")
+			first_axis_type = LineType.ROW
+			first_axis_pos = ai_anchor_y
+			second_axis_pos = ai_anchor_x
 		
-
-		if(ai_line_type==LineType.ROW):
-			cursor.position.x = (to_get_in_place[0])*64 #todo delay for cursor?
-			cursor.position.y = (piece_y)*64
-			var countInCol = get_incomplete_in_line(LineType.COLUMN,ai_anchor_x,ai_completing_color).size()
-			if(countInCol==BOARD_SIZE):#if incomplete in row is empty, then move right
-				start_line_move(LineType.ROW, LineSign.POSITIVE, ai_anchor_y) #todo let the ai move the optimal direction instead of always positive
-			else:
-				#move down until piece is in place
-				start_line_move(LineType.COLUMN, LineSign.POSITIVE, to_get_in_place[0])
+		#TODO delay for cursor
+		cursor.position.x = ai_anchor_x*64
+		cursor.position.y = ai_anchor_y*64 
+			
+		#if moving to the first axis or the second
+		# TODO let the AI move in the other direction if it is optimal
+		if(get_incomplete_in_line(first_axis_type,first_axis_pos,ai_completing_color).size()==BOARD_SIZE):#if there is no goal color in the current col, then move right
+			start_line_move(ai_line_type, LineSign.POSITIVE, second_axis_pos)
 		else:
-			cursor.position.y = (to_get_in_place[0])*64 #TODO delay for cursor
-			cursor.position.x = (piece_x)*64
-			var countInRow = get_incomplete_in_line(LineType.ROW,ai_anchor_y,ai_completing_color).size()
-			if(countInRow==BOARD_SIZE):#if incomplete in row is empty, then move right
-				start_line_move(LineType.COLUMN, LineSign.POSITIVE, ai_anchor_x)
-			else:
-				#move down until piece is in place
-				start_line_move(LineType.ROW, LineSign.POSITIVE, to_get_in_place[0])
+			start_line_move(first_axis_type, LineSign.POSITIVE, to_get_in_place[0])
 
 
 # handles user input and moves the cursor accordingly
@@ -236,7 +238,6 @@ func handle_cursor_movement(delta):
 		return
 	
 	var cursorMoveOffset = 64
-	var cursor = find_node("cursor")
 	var cookieOffset = 64
 	
 	if(not is_moving):

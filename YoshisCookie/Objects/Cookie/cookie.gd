@@ -19,7 +19,7 @@ var animation_line_direction
 var animation_line_position
 var animation_wrap_after 
 
-onready var parentBoard = get_parent().get_parent() 
+onready var parentBoard = get_parent().get_parent()
 
 
 # Called when the node enters the scene tree for the first time.
