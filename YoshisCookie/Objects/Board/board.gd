@@ -23,10 +23,7 @@ enum LineType {ROW, COLUMN}
 enum LineSign {POSITIVE=1, NEGATIVE=-1}
 
 #moving animation stuff
-var moving_animation_progress=0
-var animation_line_type
-var animation_line_direction
-var animation_line_position
+var moving_animation_progress=0 #TODO query all the cookies to see if they are moving
 
 var ai_completing_color = -1
 var ai_line_type
@@ -59,7 +56,6 @@ func generate_cookie_grid():
 	
 	handle_line_match_detection()
 	find_node("health").value=0
-	
 
 
 # Called when the node enters the scene tree for the first time.
@@ -76,77 +72,56 @@ func _ready():
 
 
 # starts the cookie moving animation
-# TODO let the cookie handle its own animation
 func start_line_move(lineType, lineDirection, linePosition):
-	# TODO the animation should be tied to the frame delta
-	if(moving_animation_progress == 0):
-		# save the motion for the animation
-		animation_line_type = lineType
-		animation_line_direction = lineDirection
-		animation_line_position = linePosition
-		
-		moving_animation_progress=1 #start the animation
+	for i in range(BOARD_SIZE):
+		var wrap
+		if lineDirection == LineSign.POSITIVE:
+			wrap = i==BOARD_SIZE-1 #TODO this only works on positive directions
+		else:
+			wrap = i==0
+		if lineType==LineType.COLUMN:
+			var r = linePosition
+			var c = i
+			cookie_grid[r][c].start_move_animation(lineType, lineDirection, linePosition, wrap)
+		else:
+			var r = i
+			var c = linePosition
+			cookie_grid[r][c].start_move_animation(lineType, lineDirection, linePosition, wrap)
+	finish_line_move(lineType, lineDirection, linePosition)
 
-
-func finish_line_move():
-	# end animation
-	moving_animation_progress = 0
-	
+func finish_line_move(lineType, lineDirection, linePosition):	
 	# TODO fix the lack of new cookie. At the begining of the 
 	# animation spawn a fake cookie, move it too, then delete it
 	# this fix should probably be done by adding a script to cookie
 	# then letting the cookie handle its own moving
 	
 	# update cookies
-	var posToWrap = 0 if animation_line_direction==LineSign.NEGATIVE else BOARD_SIZE-1
-	var posToWrapto = 0 if animation_line_direction==LineSign.POSITIVE else BOARD_SIZE-1
+	var posToWrap = 0 if lineDirection==LineSign.NEGATIVE else BOARD_SIZE-1
+	var posToWrapto = 0 if lineDirection==LineSign.POSITIVE else BOARD_SIZE-1
 	
-	if(animation_line_type==LineType.ROW):
-		var tempCookie = cookie_grid[posToWrap][animation_line_position]
-		if(animation_line_direction==LineSign.POSITIVE): # if row positive
+	if(lineType==LineType.ROW):
+		var tempCookie = cookie_grid[posToWrap][linePosition]
+		if(lineDirection==LineSign.POSITIVE): # if row positive
 			for curCookie in range(BOARD_SIZE-2, -1, -1):
-				cookie_grid[curCookie+1][animation_line_position] = cookie_grid[curCookie][animation_line_position]
+				cookie_grid[curCookie+1][linePosition] = cookie_grid[curCookie][linePosition]
 		else: # if row negative
 			for curCookie in range(0, BOARD_SIZE-1, 1):
-				cookie_grid[curCookie][animation_line_position] = cookie_grid[curCookie+1][animation_line_position]
-		cookie_grid[posToWrapto][animation_line_position] = tempCookie
+				cookie_grid[curCookie][linePosition] = cookie_grid[curCookie+1][linePosition]
+		cookie_grid[posToWrapto][linePosition] = tempCookie
 		
-		# wrap real edge cookie
-		tempCookie.position.x -= 64*BOARD_SIZE*animation_line_direction
 	else: #columns
-		var tempCookie = cookie_grid[animation_line_position][posToWrap]
-		if(animation_line_direction==LineSign.POSITIVE): # if col positive
+		var tempCookie = cookie_grid[linePosition][posToWrap]
+		if(lineDirection==LineSign.POSITIVE): # if col positive
 			for curCookie in range(BOARD_SIZE-2, -1, -1):
-				cookie_grid[animation_line_position][curCookie+1] = cookie_grid[animation_line_position][curCookie]
+				cookie_grid[linePosition][curCookie+1] = cookie_grid[linePosition][curCookie]
 		else: # if col negative
 			for curCookie in range(0, BOARD_SIZE-1, 1):
-				cookie_grid[animation_line_position][curCookie] = cookie_grid[animation_line_position][curCookie+1]
-		cookie_grid[animation_line_position][posToWrapto] = tempCookie
-		
-		# wrap real edge cookie
-		tempCookie.position.y -= 64*BOARD_SIZE*animation_line_direction
+				cookie_grid[linePosition][curCookie] = cookie_grid[linePosition][curCookie+1]
+		cookie_grid[linePosition][posToWrapto] = tempCookie
 		
 	# check for match
 	handle_line_match_detection()
 				
-
-
-# controls the moving animations and moves the cookies
-func handle_animation_motion():
-	if moving_animation_progress != 0:
-		if moving_animation_progress == 5: # if animation should end
-			finish_line_move()
-		else: # if an animation is progress
-			moving_animation_progress += 1
-			for i in range(BOARD_SIZE):
-				if animation_line_type==LineType.COLUMN:
-					var r = animation_line_position
-					var c = i
-					cookie_grid[r][c].position.y+=16 * animation_line_direction
-				else:
-					var r = i
-					var c = animation_line_position
-					cookie_grid[r][c].position.x+=16 * animation_line_direction
 
 
 func get_all_possible_colors():
@@ -379,5 +354,4 @@ func handle_line_match_detection():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	handle_cursor_movement(delta)
-	handle_animation_motion()
 

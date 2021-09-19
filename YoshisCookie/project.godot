@@ -14,7 +14,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Objects/Board/board.gd"
 }, {
-"base": "Node",
+"base": "Node2D",
 "class": "Cookie",
 "language": "GDScript",
 "path": "res://Objects/Cookie/cookie.gd"
