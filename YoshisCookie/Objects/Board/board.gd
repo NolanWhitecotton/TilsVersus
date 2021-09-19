@@ -168,8 +168,6 @@ func do_ai_steps():
 		
 		# check the pieces that need to be solved
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
-		#TODO somehow this^ is possible to return empty, not sure how a line could
-		#be complete and not be detected, and it is very rare
 		
 		var piece_y
 		var piece_x
@@ -321,6 +319,9 @@ func handle_completed_line(type, pos):
 		var current_cookie = cookie_grid[r][c]
 		current_cookie.set_color(color)
 		current_cookie.find_node("MatchParticles").emitting = true
+		
+	# check to see if the randomly generated cookies creates a match
+	handle_line_match_detection()
 
 
 # Checkes every line and row and if it finds a complete row, it calls 
