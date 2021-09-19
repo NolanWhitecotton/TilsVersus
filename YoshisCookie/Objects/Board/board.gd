@@ -76,7 +76,9 @@ func _ready():
 
 
 # starts the cookie moving animation
+# TODO let the cookie handle its own animation
 func start_line_move(lineType, lineDirection, linePosition):
+	# TODO the animation should be tied to the frame delta
 	if(moving_animation_progress == 0):
 		# save the motion for the animation
 		animation_line_type = lineType
