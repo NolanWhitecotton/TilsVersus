@@ -73,7 +73,7 @@ func start_line_move(lineType, lineDirection, linePosition):
 	for i in range(BOARD_SIZE):
 		var wrap
 		if lineDirection == LineSign.POSITIVE:
-			wrap = i==BOARD_SIZE-1 #TODO this only works on positive directions
+			wrap = i==BOARD_SIZE-1
 		else:
 			wrap = i==0
 		if lineType==LineType.COLUMN:
@@ -92,7 +92,7 @@ func finish_line_move(lineType, lineDirection, linePosition):
 	# this fix should probably be done by adding a script to cookie
 	# then letting the cookie handle its own moving
 	
-	# update cookies
+	# update cookies position in cookie_grid
 	var posToWrap = 0 if lineDirection==LineSign.NEGATIVE else BOARD_SIZE-1
 	var posToWrapto = 0 if lineDirection==LineSign.POSITIVE else BOARD_SIZE-1
 	
@@ -118,7 +118,6 @@ func finish_line_move(lineType, lineDirection, linePosition):
 		
 	# check for match
 	handle_line_match_detection()
-				
 
 
 func get_all_possible_colors():
@@ -352,6 +351,7 @@ func handle_line_match_detection():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	handle_cursor_movement(delta)
+
 
 func animation_in_progress():
 	for r in range(BOARD_SIZE):
