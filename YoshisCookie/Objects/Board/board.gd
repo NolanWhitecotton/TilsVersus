@@ -263,16 +263,17 @@ func handle_cursor_movement(delta):
 			else:
 				cursor.position.x = 0
 	else:
-		var selectedRow = cursor.position.y/64
-		var selectedCol = cursor.position.x/64
-		if Input.is_action_just_pressed("cursor_up"):
-			start_line_move(LineType.COLUMN, LineSign.NEGATIVE, selectedCol)
-		if Input.is_action_just_pressed("cursor_down"):
-			start_line_move(LineType.COLUMN, LineSign.POSITIVE, selectedCol)
-		if Input.is_action_just_pressed("cursor_left"):
-			start_line_move(LineType.ROW, LineSign.NEGATIVE, selectedRow)
-		if Input.is_action_just_pressed("cursor_right"):
-			start_line_move(LineType.ROW, LineSign.POSITIVE, selectedRow)
+		if not animation_in_progress():
+			var selectedRow = cursor.position.y/64
+			var selectedCol = cursor.position.x/64
+			if Input.is_action_just_pressed("cursor_up"):
+				start_line_move(LineType.COLUMN, LineSign.NEGATIVE, selectedCol)
+			elif Input.is_action_just_pressed("cursor_down"):
+				start_line_move(LineType.COLUMN, LineSign.POSITIVE, selectedCol)
+			elif Input.is_action_just_pressed("cursor_left"):
+				start_line_move(LineType.ROW, LineSign.NEGATIVE, selectedRow)
+			elif Input.is_action_just_pressed("cursor_right"):
+				start_line_move(LineType.ROW, LineSign.POSITIVE, selectedRow)
 
 	# handle selection toggle
 	var cursor_sprite = find_node("cursor_sprite")
