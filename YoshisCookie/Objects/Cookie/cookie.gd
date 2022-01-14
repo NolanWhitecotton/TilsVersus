@@ -29,9 +29,11 @@ func _ready():
 func _draw():
 	pass
 
+
 func set_color(new_color):
 	color = new_color
 	get_node("cookie").texture = sprites[color]
+
 
 func get_color():
 	return color
@@ -67,8 +69,10 @@ func handle_animation_motion():
 			else:
 				position.x+=16 * animation_line_direction
 
+
 func _process(delta):
 	handle_animation_motion()
-	
+
+
 func is_animating():
 	return moving_animation_progress!=0

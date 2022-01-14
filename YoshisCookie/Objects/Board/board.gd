@@ -16,17 +16,11 @@ var is_moving = false
 export var health_x_offset = 0
 export var isAI = false
 onready var cursor = find_node("cursor")
-
-var AI_delay_seconds  = 0.5 #TODO let the AI check the score and modify this value to adjust
+var AI_handler
 
 #enums
 enum LineType {ROW, COLUMN}
 enum LineSign {POSITIVE=1, NEGATIVE=-1}
-
-var ai_completing_color = -1
-var ai_line_type
-var ai_line_pos
-var AI_time_until_move
 
 # generates the 5x5 grid of cookies
 func generate_cookie_grid():
@@ -55,7 +49,6 @@ func generate_cookie_grid():
 	handle_line_match_detection()
 	find_node("health").value=0
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	find_node("health").margin_left = health_x_offset
@@ -64,9 +57,7 @@ func _ready():
 	randomize()
 	generate_cookie_grid()
 	
-	ai_set_line_typepos()
-	
-	AI_time_until_move = AI_delay_seconds
+	AI_handler = load("res://Objects/Board/AI_handler.gd").new(self)
 
 
 # starts the cookie moving animation
@@ -121,119 +112,13 @@ func finish_line_move(lineType, lineDirection, linePosition):
 	handle_line_match_detection()
 
 
-func get_all_possible_colors():
-	var possible = []
-	
-	for testing in range(5):# for every color
-		var count = 0
-		for r in range(BOARD_SIZE):#for every place on the board
-			for c in range(BOARD_SIZE):
-				if (cookie_grid[r][c].get_color()==testing):
-					count += 1
-		if count >= 5:
-			possible.append(testing)
-			
-	return possible
-
-
-func select_possible_color():
-	var valid_colors = get_all_possible_colors()
-	var selecting = valid_colors[randi() % valid_colors.size()]
-	return selecting
-
-
-func get_incomplete_in_line(var lineType, var linePos, var goalColor):
-	var incomplete = []
-	for checking in range(BOARD_SIZE):
-		if lineType==LineType.COLUMN:
-			if(cookie_grid[linePos][checking].get_color()!=goalColor):
-				incomplete.append(checking)
-		else:
-			if(cookie_grid[checking][linePos].get_color()!=goalColor):
-				incomplete.append(checking)
-				
-	return incomplete
-
-
-func ai_set_line_typepos():
-	ai_line_type =  LineType.COLUMN if randi()%2 else LineType.ROW 
-	ai_line_pos = randi() % BOARD_SIZE
-
-
-func do_ai_steps():	
-	if not animation_in_progress():
-		# pick a color to solve
-		if(ai_completing_color==-1):
-			ai_completing_color = select_possible_color()
-		
-		# check the pieces that need to be solved
-		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
-		
-		var piece_y
-		var piece_x
-		# find a piece that matches the color we are solving that is not in the right place
-		var found = false
-		for r in range(BOARD_SIZE):
-			if(found):
-				break
-			if(ai_line_type==LineType.COLUMN) and ai_line_pos==r: #skip if its the one we're solving
-				continue 
-			for c in range(BOARD_SIZE):
-				if(ai_line_type==LineType.ROW) and ai_line_pos==c: #skip if its the one we're solving
-					continue 
-				if cookie_grid[r][c].get_color()==ai_completing_color:
-					piece_y = c
-					piece_x = r
-					found = true
-					break
-		
-		# The anchor is the position which the cursor would have
-		# to be in such that the cookie we are moving is either in the row or 
-		# column of the cursor and the position we are moving it to is in the other.
-		var ai_anchor_x
-		var ai_anchor_y
-		
-		# Gets the piece on one of the right axes, then the other.
-		var first_axis_type
-		var first_axis_pos
-		var second_axis_pos 
-
-		if(ai_line_type==LineType.ROW):
-			ai_anchor_x = to_get_in_place[0]
-			ai_anchor_y = piece_y
-			first_axis_type = LineType.COLUMN
-			first_axis_pos = ai_anchor_x
-			second_axis_pos = ai_anchor_y
-		else:
-			ai_anchor_x = piece_x
-			ai_anchor_y = to_get_in_place[0]
-			first_axis_type = LineType.ROW
-			first_axis_pos = ai_anchor_y
-			second_axis_pos = ai_anchor_x
-		
-		#TODO delay for cursor
-		cursor.position.x = ai_anchor_x*64
-		cursor.position.y = ai_anchor_y*64 
-			
-		#if moving to the first axis or the second
-		# TODO let the AI move in the other direction if it is optimal
-		if(get_incomplete_in_line(first_axis_type,first_axis_pos,ai_completing_color).size()==BOARD_SIZE):#if there is no goal color in the current col, then move right
-			start_line_move(ai_line_type, LineSign.POSITIVE, second_axis_pos)
-		else:
-			start_line_move(first_axis_type, LineSign.POSITIVE, to_get_in_place[0])
-
-
 # handles user input and moves the cursor accordingly
 func handle_cursor_movement(delta):
 	if get_parent().winner != Game.Players.NOONE: #if the game is over
 		return
 		
 	if isAI:
-		AI_time_until_move -= delta
-		if(AI_time_until_move<=0):
-			do_ai_steps()
-			AI_time_until_move = AI_delay_seconds
-		return
+		AI_handler.move_cursor(delta)
 	
 	var cursorMoveOffset = 64
 	var cookieOffset = 64
@@ -293,8 +178,8 @@ func add_points(points):
 
 
 func handle_completed_line(type, pos):
-	ai_completing_color = -1
-	ai_set_line_typepos()
+	if isAI:
+		AI_handler.handle_completion()
 	
 	add_points(5)
 
