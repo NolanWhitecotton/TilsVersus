@@ -26,9 +26,6 @@ onready var parentBoard = get_parent().get_parent()
 func _ready():
 	pass
 
-func _draw():
-	pass
-
 
 func set_color(new_color):
 	color = new_color
@@ -70,7 +67,7 @@ func handle_animation_motion():
 				position.x+=16 * animation_line_direction
 
 
-func _process(delta):
+func _process(_delta):
 	handle_animation_motion()
 
 

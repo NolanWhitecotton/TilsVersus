@@ -57,7 +57,9 @@ func _ready():
 	randomize()
 	generate_cookie_grid()
 	
-	AI_handler = load("res://Objects/Board/AI_handler.gd").new(self)
+	if isAI:
+		AI_handler = load("res://Objects/Board/AI_handler.gd").new(self)
+		self.add_child(AI_handler)
 
 
 # starts the cookie moving animation
@@ -177,10 +179,7 @@ func add_points(points):
 	find_node("health").value+=points
 
 
-func handle_completed_line(type, pos):
-	if isAI:
-		AI_handler.handle_completion()
-	
+func handle_completed_line(type, pos):	
 	add_points(5)
 
 	#get the color that was matched
@@ -205,6 +204,9 @@ func handle_completed_line(type, pos):
 		current_cookie.set_color(color)
 		current_cookie.find_node("MatchParticles").emitting = true
 		
+	if isAI:
+		AI_handler.handle_completion()
+	
 	# check to see if the randomly generated cookies creates a match
 	handle_line_match_detection()
 

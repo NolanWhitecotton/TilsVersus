@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 class_name AI_handler
 
@@ -16,13 +16,16 @@ func _init(working_board):
 	board = working_board
 	
 	AI_time_until_move = AI_delay_seconds
+	
+	select_possible_color()
 	ai_set_line_typepos()
 
 
 func select_possible_color():
 	var valid_colors = get_all_possible_colors()
+	
 	var selecting = valid_colors[randi() % valid_colors.size()]
-	return selecting
+	ai_completing_color = selecting
 
 
 func ai_set_line_typepos():
@@ -33,9 +36,6 @@ func ai_set_line_typepos():
 func do_ai_steps():	
 	if not board.animation_in_progress():
 		# pick a color to solve
-		
-		if(ai_completing_color==-1):
-			ai_completing_color = select_possible_color()
 		
 		# check the pieces that need to be solved
 		var to_get_in_place = get_incomplete_in_line(ai_line_type, ai_line_pos, ai_completing_color)
@@ -103,7 +103,7 @@ func move_cursor(delta):
 
 
 func handle_completion():
-	ai_completing_color = -1
+	select_possible_color()
 	ai_set_line_typepos()
 
 
@@ -134,3 +134,16 @@ func get_incomplete_in_line(var lineType, var linePos, var goalColor):
 				
 	return incomplete
 
+
+func _process(_delta):
+	update()
+
+
+func _draw():
+	if 0: #debug ai drawing
+		var pos = ai_line_pos*64
+		if ai_line_type==board.LineType.COLUMN:
+			draw_line(Vector2(pos,-64), Vector2(pos,352), Color(255,255,255), 20)
+		else:
+			draw_line(Vector2(-64,pos), Vector2(352,pos), Color(255,255,255), 20)
+		pass
