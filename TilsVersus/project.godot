@@ -38,7 +38,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="YoshisCookie"
+config/name="TilsVersus"
 run/main_scene="res://Objects/Game/game.tscn"
 config/icon="res://icon.png"
 
